@@ -22,8 +22,9 @@ export default function AboutPage() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-gradient-radial from-[#00d2c6]/20 via-transparent to-transparent blur-3xl"></div>
 
       {/* Navigation */}
-      <header className="relative z-50 container mx-auto px-4 py-6">
-        <nav className="flex items-center justify-between backdrop-blur-sm bg-white/5 rounded-2xl px-6 py-4 border border-white/10">
+      <header className="fixed top-0 left-0 z-50 w-full bg-transparent backdrop-blur-sm">
+       <nav className="flex items-center justify-between backdrop-blur-sm bg-white/5 px-4 sm:px-6 py-3 sm:py-4 border border-white/10">
+
           <div className="flex items-center space-x-8">
             <Link href="/" className="flex items-center space-x-3 group">
               <div className="h-12 w-12 relative">
@@ -61,7 +62,7 @@ export default function AboutPage() {
             </Link>
           </div>
         </nav>
-      </header>
+      </header><br /><br />
 
       {/* Hero Section */}
       <section className="relative z-10 container mx-auto px-4 pt-16 pb-20">

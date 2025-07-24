@@ -1,250 +1,319 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import NewProjectModal from "@/components/new-project-modal"
-import { useProjects, type Project } from "@/hooks/use-projects"
-import { Loader2, AlertCircle, RefreshCw, Calendar, Users, BarChart3, Trash2, Edit } from "lucide-react"
-import { useTasks } from '@/hooks/use-tasks';
+import { useState, useEffect } from "react";
+import NewProjectModal from "@/components/new-project-modal";
+import { useProjects, type Project } from "@/hooks/use-projects";
+import {
+  Loader2,
+  AlertCircle,
+  RefreshCw,
+  Calendar,
+  Users,
+  BarChart3,
+  Trash2,
+  Edit,
+} from "lucide-react";
+import { useTasks } from "@/hooks/use-tasks";
+import { useRouter } from "next/navigation";
 
 export default function ProjectsPage() {
-  const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false)
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [priorityFilter, setPriorityFilter] = useState("all")
+  const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [priorityFilter, setPriorityFilter] = useState("all");
   const [isEditProjectModalOpen, setIsEditProjectModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
-  const [currentUser, setCurrentUser] = useState<any>(null)
-  const [userPermissions, setUserPermissions] = useState<string[]>([])
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [userPermissions, setUserPermissions] = useState<string[]>([]);
+  const router = useRouter();
 
   // 🔗 Hook untuk koneksi dengan backend API
-  const { projects, loading, error, stats, createProject, updateProject, deleteProject, refetch } = useProjects()
+  const {
+    projects,
+    loading,
+    error,
+    stats,
+    createProject,
+    updateProject,
+    deleteProject,
+    refetch,
+  } = useProjects();
   const { tasks: allTasks } = useTasks();
 
   // Get current user and permissions
   useEffect(() => {
-    const userStr = localStorage.getItem("nexapro_user")
+    const userStr = localStorage.getItem("nexapro_user");
     if (userStr) {
-      const user = JSON.parse(userStr)
-      setCurrentUser(user)
-      
+      const user = JSON.parse(userStr);
+      setCurrentUser(user);
+
       // Fetch user permissions from backend
       fetch(`http://localhost:8000/api/admin/user-permissions/${user.id}`)
-        .then(res => res.json())
-        .then(data => {
+        .then((res) => res.json())
+        .then((data) => {
           if (data.success && data.data) {
-            setUserPermissions(data.data.map((p: any) => p.name))
+            setUserPermissions(data.data.map((p: any) => p.name));
           }
         })
         .catch(() => {
           // Fallback to role-based permissions if API fails
           const rolePermissions = {
             admin: [
-              "manage_users", "manage_projects", "manage_tasks", "view_reports", 
-              "export_data", "manage_settings", "manage_integrations", "manage_roles",
-              "track_time", "view_projects", "manage_team"
+              "manage_users",
+              "manage_projects",
+              "manage_tasks",
+              "view_reports",
+              "export_data",
+              "manage_settings",
+              "manage_integrations",
+              "manage_roles",
+              "track_time",
+              "view_projects",
+              "manage_team",
             ],
             project_manager: [
-              "manage_projects", "manage_tasks", "assign_tasks", "view_reports",
-              "export_data", "manage_team", "view_time_tracking", "track_time", "view_projects"
+              "manage_projects",
+              "manage_tasks",
+              "assign_tasks",
+              "view_reports",
+              "export_data",
+              "manage_team",
+              "view_time_tracking",
+              "track_time",
+              "view_projects",
             ],
             member: [
-              "view_projects", "manage_own_tasks", "comment_tasks", "upload_files",
-              "track_time", "view_own_reports"
-            ]
-          }
-          setUserPermissions(rolePermissions[user.role as keyof typeof rolePermissions] || [])
-        })
+              "view_projects",
+              "manage_own_tasks",
+              "comment_tasks",
+              "upload_files",
+              "track_time",
+              "view_own_reports",
+            ],
+          };
+          setUserPermissions(
+            rolePermissions[user.role as keyof typeof rolePermissions] || []
+          );
+        });
     }
-  }, [])
+  }, []);
 
   // Real-time synchronization
   useEffect(() => {
     const handleProjectUpdated = (event: CustomEvent) => {
-      console.log("🔄 Real-time project update received in Projects page:", event.detail)
+      console.log(
+        "🔄 Real-time project update received in Projects page:",
+        event.detail
+      );
       // Refetch projects to get latest data
-      refetch()
-    }
+      refetch();
+    };
 
     const handleTaskUpdated = (event: CustomEvent) => {
-      console.log("🔄 Real-time task update received in Projects page:", event.detail)
+      console.log(
+        "🔄 Real-time task update received in Projects page:",
+        event.detail
+      );
       // Refetch projects to get latest data (tasks might affect project progress)
-      refetch()
-    }
+      refetch();
+    };
 
     if (typeof window !== "undefined") {
-      window.addEventListener("projectUpdated", handleProjectUpdated as EventListener)
-      window.addEventListener("taskUpdated", handleTaskUpdated as EventListener)
+      window.addEventListener(
+        "projectUpdated",
+        handleProjectUpdated as EventListener
+      );
+      window.addEventListener(
+        "taskUpdated",
+        handleTaskUpdated as EventListener
+      );
       return () => {
-        window.removeEventListener("projectUpdated", handleProjectUpdated as EventListener)
-        window.removeEventListener("taskUpdated", handleTaskUpdated as EventListener)
-      }
+        window.removeEventListener(
+          "projectUpdated",
+          handleProjectUpdated as EventListener
+        );
+        window.removeEventListener(
+          "taskUpdated",
+          handleTaskUpdated as EventListener
+        );
+      };
     }
-  }, [refetch])
+  }, [refetch]);
 
   // Permission check functions
   const hasPermission = (permission: string): boolean => {
-    if (!currentUser) return false
-    if (currentUser.role === "admin") return true // Admin has all permissions
-    return userPermissions.includes(permission)
-  }
+    if (!currentUser) return false;
+    if (currentUser.role === "admin") return true; // Admin has all permissions
+    return userPermissions.includes(permission);
+  };
 
   // 🎨 Helper functions untuk styling
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Completed":
-        return "bg-green-100 text-green-800 border-green-200"
+        return "bg-green-100 text-green-800 border-green-200";
       case "In Progress":
-        return "bg-green-100 text-blue-800 border-green-200"
+        return "bg-green-100 text-blue-800 border-green-200";
       case "Planning":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200"
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "On Hold":
-        return "bg-gray-100 text-gray-800 border-gray-200"
+        return "bg-gray-100 text-gray-800 border-gray-200";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200"
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
-  }
+  };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "High":
-        return "bg-red-100 text-red-800 border-red-200"
+        return "bg-red-100 text-red-800 border-red-200";
       case "Medium":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200"
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "Low":
-        return "bg-green-100 text-green-800 border-green-200"
+        return "bg-green-100 text-green-800 border-green-200";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200"
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
-  }
+  };
 
   const getPriorityIcon = (priority: string) => {
     switch (priority) {
       case "High":
-        return "🔴"
+        return "🔴";
       case "Medium":
-        return "🟡"
+        return "🟡";
       case "Low":
-        return "🟢"
+        return "🟢";
       default:
-        return "⚪"
+        return "⚪";
     }
-  }
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "Completed":
-        return "✅"
+        return "✅";
       case "In Progress":
-        return "🔄"
+        return "🔄";
       case "Planning":
-        return "📋"
+        return "📋";
       case "On Hold":
-        return "⏸️"
+        return "⏸️";
       default:
-        return "📋"
+        return "📋";
     }
-  }
+  };
 
   // 📝 Event handlers
   const handleCreateProject = async (projectData: any) => {
     if (!hasPermission("manage_projects")) {
-      alert("You don't have permission to create projects")
-      return
+      alert("You don't have permission to create projects");
+      return;
     }
-    
+
     try {
-      await createProject(projectData)
-      setIsNewProjectModalOpen(false)
-      console.log("✅ Project created successfully!")
+      await createProject(projectData);
+      setIsNewProjectModalOpen(false);
+      console.log("✅ Project created successfully!");
     } catch (error) {
-      console.error("❌ Failed to create project:", error)
-      alert("Failed to create project. Please try again.")
+      console.error("❌ Failed to create project:", error);
+      alert("Failed to create project. Please try again.");
     }
-  }
+  };
 
   const handleDeleteProject = async (id: number) => {
     if (!hasPermission("manage_projects")) {
-      alert("You don't have permission to delete projects")
-      return
+      alert("You don't have permission to delete projects");
+      return;
     }
-    
+
     if (confirm("Are you sure you want to delete this project?")) {
       try {
-        await deleteProject(id)
-        console.log("✅ Project deleted successfully!")
+        await deleteProject(id);
+        console.log("✅ Project deleted successfully!");
       } catch (error) {
-        console.error("❌ Failed to delete project:", error)
-        alert("Failed to delete project. Please try again.")
+        console.error("❌ Failed to delete project:", error);
+        alert("Failed to delete project. Please try again.");
       }
     }
-  }
+  };
 
-  const handleUpdateProjectStatus = async (projectId: number, newStatus: string) => {
+  const handleUpdateProjectStatus = async (
+    projectId: number,
+    newStatus: string
+  ) => {
     if (!hasPermission("manage_projects")) {
-      alert("You don't have permission to update projects")
-      return
+      alert("You don't have permission to update projects");
+      return;
     }
-    
+
     try {
-      const project = projects.find(p => p.id === projectId)
+      const project = projects.find((p) => p.id === projectId);
       if (!project) {
-        console.error("❌ Project not found")
-        return
+        console.error("❌ Project not found");
+        return;
       }
-      
-      let updates: any = { status: newStatus }
-      
+
+      let updates: any = { status: newStatus };
+
       // Auto-update progress when status is changed to Completed
       if (newStatus === "Completed") {
-        updates.progress = 100
-        console.log(`🔄 Auto-setting progress to 100% for project ${project.name} (status: Completed)`)
+        updates.progress = 100;
+        console.log(
+          `🔄 Auto-setting progress to 100% for project ${project.name} (status: Completed)`
+        );
       }
-      
-      await updateProject(projectId, updates)
-      console.log(`✅ Project status updated to ${newStatus}`)
-      
+
+      await updateProject(projectId, updates);
+      console.log(`✅ Project status updated to ${newStatus}`);
+
       // Trigger real-time update
       if (typeof window !== "undefined") {
-        window.dispatchEvent(new CustomEvent("projectUpdated", {
-          detail: { 
-            projectId, 
-            project: { ...project, ...updates }
-          }
-        }))
+        window.dispatchEvent(
+          new CustomEvent("projectUpdated", {
+            detail: {
+              projectId,
+              project: { ...project, ...updates },
+            },
+          })
+        );
       }
     } catch (error) {
-      console.error("❌ Failed to update project status:", error)
-      alert("Failed to update project status. Please try again.")
+      console.error("❌ Failed to update project status:", error);
+      alert("Failed to update project status. Please try again.");
     }
-  }
+  };
 
   const handleFilterChange = (type: "status" | "priority", value: string) => {
     if (type === "status") {
-      setStatusFilter(value)
+      setStatusFilter(value);
     } else {
-      setPriorityFilter(value)
+      setPriorityFilter(value);
     }
 
     // 🔄 Refetch dengan filter baru
     refetch({
       status: type === "status" ? value : statusFilter,
       priority: type === "priority" ? value : priorityFilter,
-    })
-  }
+    });
+  };
 
   // Helper untuk hitung progress akumulasi task
   function getProjectProgress(projectId: number) {
-    const projectTasks = allTasks.filter(t => t.project_id === projectId);
+    const projectTasks = allTasks.filter((t) => t.project_id === projectId);
     if (projectTasks.length === 0) return 0;
-    const totalProgress = projectTasks.reduce((sum, t) => sum + (t.progress || 0), 0);
+    const totalProgress = projectTasks.reduce(
+      (sum, t) => sum + (t.progress || 0),
+      0
+    );
     return Math.round(totalProgress / projectTasks.length);
   }
 
   function getProjectStatus(projectId: number) {
     const progress = getProjectProgress(projectId);
-    if (progress === 100) return 'Completed';
-    if (progress === 0) return 'Planning';
-    return 'In Progress';
+    if (progress === 100) return "Completed";
+    if (progress === 0) return "Planning";
+    return "In Progress";
   }
 
   // 🔄 Loading state
@@ -254,7 +323,7 @@ export default function ProjectsPage() {
         <Loader2 className="h-8 w-8 animate-spin text-green-600" />
         <span className="ml-2 text-gray-600">Loading projects...</span>
       </div>
-    )
+    );
   }
 
   // ❌ Error state dengan retry option
@@ -282,10 +351,12 @@ export default function ProjectsPage() {
           </button>
         </div>
         <div className="mt-4 text-xs text-gray-500">
-          <p>Make sure your Laravel server is running on http://localhost:8000</p>
+          <p>
+            Make sure your Laravel server is running on http://localhost:8000
+          </p>
         </div>
       </div>
-    )
+    );
   }
 
   // 📊 Grid view component
@@ -299,14 +370,21 @@ export default function ProjectsPage() {
           {/* Header */}
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-1">{project.name}</h3>
-              <p className="text-sm text-gray-600 mb-3 line-clamp-2">{project.description || "No description"}</p>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-1">
+                {project.name}
+              </h3>
+              <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                {project.description || "No description"}
+              </p>
             </div>
             <div className="flex items-center space-x-1">
               {hasPermission("manage_projects") && (
                 <>
                   <button
-                    onClick={() => { setEditingProject(project); setIsEditProjectModalOpen(true); }}
+                    onClick={() => {
+                      setEditingProject(project);
+                      setIsEditProjectModalOpen(true);
+                    }}
                     className="text-gray-400 hover:text-green-600 p-1 rounded transition-colors"
                     title="Edit project"
                   >
@@ -326,10 +404,19 @@ export default function ProjectsPage() {
 
           {/* Status & Priority */}
           <div className="flex items-center space-x-2 mb-4">
-            <span className={`px-3 py-1 text-xs rounded-full border ${getStatusColor(getProjectStatus(project.id))}`}>
-              {getStatusIcon(getProjectStatus(project.id))} {getProjectStatus(project.id)}
+            <span
+              className={`px-3 py-1 text-xs rounded-full border ${getStatusColor(
+                getProjectStatus(project.id)
+              )}`}
+            >
+              {getStatusIcon(getProjectStatus(project.id))}{" "}
+              {getProjectStatus(project.id)}
             </span>
-            <span className={`px-3 py-1 text-xs rounded-full border ${getPriorityColor(project.priority)}`}>
+            <span
+              className={`px-3 py-1 text-xs rounded-full border ${getPriorityColor(
+                project.priority
+              )}`}
+            >
               {getPriorityIcon(project.priority)} {project.priority}
             </span>
           </div>
@@ -341,7 +428,9 @@ export default function ProjectsPage() {
                 <BarChart3 size={14} className="mr-1" />
                 Progress
               </span>
-              <span className="text-sm font-medium text-gray-800">{getProjectProgress(project.id)}%</span>
+              <span className="text-sm font-medium text-gray-800">
+                {getProjectProgress(project.id)}%
+              </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
@@ -355,11 +444,14 @@ export default function ProjectsPage() {
           <div className="flex items-center justify-between mb-4">
             <div className="text-sm text-gray-600 flex items-center">
               <Users size={14} className="mr-1" />
-              <span className="font-medium">{project.tasks.completed}</span>/{project.tasks.total} tasks
+              <span className="font-medium">{project.tasks.completed}</span>/
+              {project.tasks.total} tasks
             </div>
             <div className="text-sm text-gray-600 flex items-center">
               <Calendar size={14} className="mr-1" />
-              {project.due_date ? new Date(project.due_date).toLocaleDateString() : "No due date"}
+              {project.due_date
+                ? new Date(project.due_date).toLocaleDateString()
+                : "No due date"}
             </div>
           </div>
 
@@ -395,7 +487,9 @@ export default function ProjectsPage() {
               )}
             </div>
             <button
-              onClick={() => (window.location.href = `/dashboard/projects/${project.id}`)}
+              onClick={() =>
+                (window.location.href = `/dashboard/projects/${project.id}`)
+              }
               className="text-green-600 hover:text-blue-800 text-sm font-medium hover:underline transition-colors"
             >
               View Details
@@ -404,7 +498,7 @@ export default function ProjectsPage() {
         </div>
       ))}
     </div>
-  )
+  );
 
   // 📋 List view component - IMPLEMENTASI LENGKAP
   const renderListView = () => (
@@ -416,7 +510,9 @@ export default function ProjectsPage() {
               <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Project
               </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
               <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Priority
               </th>
@@ -426,7 +522,9 @@ export default function ProjectsPage() {
               <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Due Date
               </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Team</th>
+              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Team
+              </th>
               <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
@@ -434,11 +532,16 @@ export default function ProjectsPage() {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {projects.map((project) => (
-              <tr key={project.id} className="hover:bg-gray-50 transition-colors">
+              <tr
+                key={project.id}
+                className="hover:bg-gray-50 transition-colors"
+              >
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <div>
-                      <div className="text-sm font-medium text-gray-900">{project.name}</div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {project.name}
+                      </div>
                       <div className="text-sm text-gray-500 max-w-xs truncate">
                         {project.description || "No description"}
                       </div>
@@ -447,14 +550,19 @@ export default function ProjectsPage() {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span
-                    className={`inline-flex px-3 py-1 text-xs rounded-full border ${getStatusColor(getProjectStatus(project.id))}`}
+                    className={`inline-flex px-3 py-1 text-xs rounded-full border ${getStatusColor(
+                      getProjectStatus(project.id)
+                    )}`}
                   >
-                    {getStatusIcon(getProjectStatus(project.id))} {getProjectStatus(project.id)}
+                    {getStatusIcon(getProjectStatus(project.id))}{" "}
+                    {getProjectStatus(project.id)}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span
-                    className={`inline-flex px-3 py-1 text-xs rounded-full border ${getPriorityColor(project.priority)}`}
+                    className={`inline-flex px-3 py-1 text-xs rounded-full border ${getPriorityColor(
+                      project.priority
+                    )}`}
                   >
                     {getPriorityIcon(project.priority)} {project.priority}
                   </span>
@@ -467,13 +575,17 @@ export default function ProjectsPage() {
                         style={{ width: `${getProjectProgress(project.id)}%` }}
                       ></div>
                     </div>
-                    <span className="text-sm text-gray-900 font-medium">{getProjectProgress(project.id)}%</span>
+                    <span className="text-sm text-gray-900 font-medium">
+                      {getProjectProgress(project.id)}%
+                    </span>
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   <div className="flex items-center">
                     <Calendar size={14} className="mr-1 text-gray-400" />
-                    {project.due_date ? new Date(project.due_date).toLocaleDateString() : "No due date"}
+                    {project.due_date
+                      ? new Date(project.due_date).toLocaleDateString()
+                      : "No due date"}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -510,7 +622,9 @@ export default function ProjectsPage() {
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div className="flex items-center space-x-2">
                     <button
-                      onClick={() => (window.location.href = `/dashboard/projects/${project.id}`)}
+                      onClick={() =>
+                        (window.location.href = `/dashboard/projects/${project.id}`)
+                      }
                       className="text-green-600 hover:text-green-800 transition-colors"
                       title="View project"
                     >
@@ -532,7 +646,10 @@ export default function ProjectsPage() {
                     {hasPermission("manage_projects") && (
                       <>
                         <button
-                          onClick={() => { setEditingProject(project); setIsEditProjectModalOpen(true); }}
+                          onClick={() => {
+                            setEditingProject(project);
+                            setIsEditProjectModalOpen(true);
+                          }}
                           className="text-green-600 hover:text-blue-800 transition-colors"
                           title="Edit project"
                         >
@@ -555,7 +672,7 @@ export default function ProjectsPage() {
         </table>
       </div>
     </div>
-  )
+  );
 
   return (
     <div>
@@ -563,9 +680,13 @@ export default function ProjectsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
-          <p className="text-gray-600 mt-1">Manage and track your project progress</p>
+          <p className="text-gray-600 mt-1">
+            Manage and track your project progress
+          </p>
           {/* 🔍 Debug info - bisa dihapus di production */}
-          <p className="text-xs text-gray-400 mt-1">Connected to API • {projects.length} projects loaded</p>
+          <p className="text-xs text-gray-400 mt-1">
+            Connected to API • {projects.length} projects loaded
+          </p>
         </div>
         {hasPermission("manage_projects") ? (
           <button
@@ -590,8 +711,12 @@ export default function ProjectsPage() {
           </button>
         ) : (
           <div className="text-center">
-            <p className="text-sm text-gray-500">You don't have permission to create projects</p>
-            <p className="text-xs text-gray-400">Contact your administrator for access</p>
+            <p className="text-sm text-gray-500">
+              You don't have permission to create projects
+            </p>
+            <p className="text-xs text-gray-400">
+              Contact your administrator for access
+            </p>
           </div>
         )}
       </div>
@@ -602,7 +727,9 @@ export default function ProjectsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 mb-1">Total Projects</p>
-              <p className="text-3xl font-bold text-gray-900">{stats?.total || 0}</p>
+              <p className="text-3xl font-bold text-gray-900">
+                {stats?.total || 0}
+              </p>
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
               <svg
@@ -628,7 +755,9 @@ export default function ProjectsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 mb-1">In Progress</p>
-              <p className="text-3xl font-bold text-gray-900">{stats?.in_progress || 0}</p>
+              <p className="text-3xl font-bold text-gray-900">
+                {stats?.in_progress || 0}
+              </p>
             </div>
             <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
               <svg
@@ -654,7 +783,9 @@ export default function ProjectsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 mb-1">Completed</p>
-              <p className="text-3xl font-bold text-gray-900">{stats?.completed || 0}</p>
+              <p className="text-3xl font-bold text-gray-900">
+                {stats?.completed || 0}
+              </p>
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
               <svg
@@ -680,7 +811,9 @@ export default function ProjectsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 mb-1">On Hold</p>
-              <p className="text-3xl font-bold text-gray-900">{stats?.on_hold || 0}</p>
+              <p className="text-3xl font-bold text-gray-900">
+                {stats?.on_hold || 0}
+              </p>
             </div>
             <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
               <svg
@@ -734,7 +867,9 @@ export default function ProjectsPage() {
           <button
             onClick={() => setViewMode("grid")}
             className={`p-2 rounded-md transition-all ${
-              viewMode === "grid" ? "bg-white text-green-600 shadow-sm" : "text-gray-400 hover:text-gray-600"
+              viewMode === "grid"
+                ? "bg-white text-green-600 shadow-sm"
+                : "text-gray-400 hover:text-gray-600"
             }`}
             title="Grid View"
           >
@@ -758,7 +893,9 @@ export default function ProjectsPage() {
           <button
             onClick={() => setViewMode("list")}
             className={`p-2 rounded-md transition-all ${
-              viewMode === "list" ? "bg-white text-green-600 shadow-sm" : "text-gray-400 hover:text-gray-600"
+              viewMode === "list"
+                ? "bg-white text-green-600 shadow-sm"
+                : "text-gray-400 hover:text-gray-600"
             }`}
             title="List View"
           >
@@ -804,8 +941,12 @@ export default function ProjectsPage() {
               <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
             </svg>
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No projects found</h3>
-          <p className="text-gray-500 mb-6">Get started by creating your first project</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            No projects found
+          </h3>
+          <p className="text-gray-500 mb-6">
+            Get started by creating your first project
+          </p>
           {hasPermission("manage_projects") ? (
             <button
               onClick={() => setIsNewProjectModalOpen(true)}
@@ -815,8 +956,12 @@ export default function ProjectsPage() {
             </button>
           ) : (
             <div className="text-center">
-              <p className="text-sm text-gray-500 mb-2">You don't have permission to create projects</p>
-              <p className="text-xs text-gray-400">Contact your administrator for access</p>
+              <p className="text-sm text-gray-500 mb-2">
+                You don't have permission to create projects
+              </p>
+              <p className="text-xs text-gray-400">
+                Contact your administrator for access
+              </p>
             </div>
           )}
         </div>
@@ -834,33 +979,39 @@ export default function ProjectsPage() {
           onSubmit={handleCreateProject}
         />
       )}
-      {hasPermission("manage_projects") && isEditProjectModalOpen && editingProject && (
-        <NewProjectModal
-          isOpen={isEditProjectModalOpen}
-          onClose={() => setIsEditProjectModalOpen(false)}
-          initialData={{
-            name: editingProject.name,
-            description: editingProject.description || '',
-            status: editingProject.status,
-            priority: editingProject.priority,
-            due_date: editingProject.due_date || '',
-            progress: editingProject.progress
-          }}
-          onSubmit={async (data) => {
-            await updateProject(editingProject.id, {
-              name: data.name,
-              description: data.description || '',
-              status: data.status as "Planning" | "In Progress" | "Completed" | "On Hold",
-              priority: data.priority as "Low" | "Medium" | "High",
-              due_date: data.due_date || undefined,
-              progress: data.progress || 0
-            });
-            setIsEditProjectModalOpen(false);
-            setEditingProject(null);
-            refetch();
-          }}
-        />
-      )}
+      {hasPermission("manage_projects") &&
+        isEditProjectModalOpen &&
+        editingProject && (
+          <NewProjectModal
+            isOpen={isEditProjectModalOpen}
+            onClose={() => setIsEditProjectModalOpen(false)}
+            initialData={{
+              name: editingProject.name,
+              description: editingProject.description || "",
+              status: editingProject.status,
+              priority: editingProject.priority,
+              due_date: editingProject.due_date || "",
+              progress: editingProject.progress,
+            }}
+            onSubmit={async (data) => {
+              await updateProject(editingProject.id, {
+                name: data.name,
+                description: data.description || "",
+                status: data.status as
+                  | "Planning"
+                  | "In Progress"
+                  | "Completed"
+                  | "On Hold",
+                priority: data.priority as "Low" | "Medium" | "High",
+                due_date: data.due_date || undefined,
+                progress: data.progress || 0,
+              });
+              setIsEditProjectModalOpen(false);
+              setEditingProject(null);
+              refetch();
+            }}
+          />
+        )}
     </div>
-  )
+  );
 }

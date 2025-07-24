@@ -27,8 +27,8 @@ export default function Home() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-gradient-radial from-[#00d2c6]/20 via-transparent to-transparent blur-3xl"></div>
 
       {/* Navigation - Higher z-index */}
-      <header className="relative z-50 container mx-auto px-4 py-4 sm:py-6">
-        <nav className="flex items-center justify-between backdrop-blur-sm bg-white/5 rounded-2xl px-4 sm:px-6 py-3 sm:py-4 border border-white/10">
+      <header className="fixed top-0 left-0 z-50 w-full bg-transparent backdrop-blur-sm">
+        <nav className="flex items-center justify-between backdrop-blur-sm bg-white/5 px-4 sm:px-6 py-3 sm:py-4 border border-white/10">
           <div className="flex items-center space-x-4 sm:space-x-8">
             <Link
               href="/"
@@ -136,19 +136,20 @@ export default function Home() {
           </div>
         )}
       </header>
+      <br></br>
 
       {/* Hero Section - Lower z-index so dropdown appears above */}
-      <main className="relative z-10 container mx-auto px-4 pt-8 sm:pt-20 pb-8 sm:pb-16">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-8 sm:mb-16">
-            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-[#00d2c6]/20 to-[#00b5ab]/20 rounded-full px-4 sm:px-6 py-2 mb-6 sm:mb-8 border border-[#00d2c6]/30">
-              <Zap className="h-3 w-3 sm:h-4 sm:w-4 text-[#00d2c6]" />
-              <span className="text-xs sm:text-sm text-gray-300">
+      <main className="relative z-10 container mx-auto px-4 pt-12 sm:pt-20 pb-12 sm:pb-20">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12 sm:mb-20">
+            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-[#00d2c6]/20 to-[#00b5ab]/20 rounded-full px-6 py-2 border border-[#00d2c6]/30 mb-6">
+              <Zap className="h-4 w-4 text-[#00d2c6]" />
+              <span className="text-sm text-gray-300">
                 Platform Manajemen Proyek Perusahaan
               </span>
             </div>
 
-            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 sm:mb-8 leading-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6">
               <span className="bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">
                 Kelola Proyek
               </span>
@@ -158,24 +159,23 @@ export default function Home() {
               </span>
             </h1>
 
-            <p className="text-base sm:text-xl text-gray-300 mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed px-4 sm:px-0">
+            <p className="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed mb-10">
               NexaPro adalah platform manajemen proyek internal yang membantu
               tim perusahaan mengelola tugas, memantau progres, dan
               berkolaborasi dengan efisiensi maksimal.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 max-w-lg mx-auto mb-12 sm:mb-16 px-4 sm:px-0">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mb-10">
               <Link
                 href="/dashboard"
-                className="w-full sm:w-auto bg-gradient-to-r from-[#00d2c6] to-[#00b5ab] hover:from-[#00b5ab] hover:to-[#009688] text-white py-3 sm:py-4 px-6 sm:px-8 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 whitespace-nowrap"
+                className="bg-gradient-to-r from-[#00d2c6] to-[#00b5ab] hover:from-[#00b5ab] hover:to-[#009688] text-white py-3 px-8 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
               >
                 <span>Mulai Bekerja</span>
-                <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
+                <ArrowRight className="h-5 w-5" />
               </Link>
             </div>
 
-            {/* Trust Indicators */}
-            <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-8 text-sm text-gray-400 mb-12 sm:mb-16">
+            <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-8 text-sm text-gray-400">
               <div className="flex items-center space-x-2">
                 <CheckCircle className="h-4 w-4 text-[#00d2c6]" />
                 <span>Akses 24/7</span>
@@ -193,18 +193,18 @@ export default function Home() {
 
           {/* Hero Image */}
           <div className="relative px-4 sm:px-0">
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-transparent to-transparent z-10"></div>
-            <div className="relative mx-auto max-w-md">
+            <div className="absolute inset-0  from-[#0f172a] via-transparent to-transparent z-10"></div>
+            <div className="relative mx-auto max-w-3xl">
               {" "}
-              {/* Dikurangi dari max-w-xl ke max-w-md */}
-              <div className="absolute inset-0 bg-gradient-to-r from-[#00d2c6]/20 to-[#00b5ab]/20 rounded-2xl sm:rounded-3xl blur-3xl"></div>
-              <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-1 sm:p-2 border border-white/20">
+              {/* Lebarkan ukuran gambar */}
+              <div className="absolute inset-0 bg-gradient-to-r from-[#00d2c6]/20 to-[#00b5ab]/20 blur-3xl rounded-3xl"></div>
+              <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-3xl p-2 border border-white/20">
                 <Image
-                  src="/Untitledesign.png"
+                  src="/gambarlanding.jpg"
                   alt="NexaPro Dashboard Preview"
-                  width={600} // Boleh dikecilkan juga kalau mau
-                  height={300}
-                  className="rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-[400px] h-auto mx-auto"
+                  width={1000}
+                  height={500}
+                  className="rounded-2xl w-full h-auto mx-auto"
                   priority
                 />
               </div>

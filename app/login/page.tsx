@@ -1,21 +1,21 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [rememberMe, setRememberMe] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError(null)
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
     try {
       const res = await fetch("http://localhost:8000/api/login", {
         method: "POST",
@@ -23,21 +23,21 @@ export default function LoginPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
-      })
-      const data = await res.json()
+      });
+      const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.message || `HTTP ${res.status}`)
+        throw new Error(data.message || `HTTP ${res.status}`);
       }
       // Simpan token ke localStorage
-      localStorage.setItem("nexapro_token", data.token)
-      localStorage.setItem("nexapro_user", JSON.stringify(data.user))
-      router.push("/dashboard")
+      localStorage.setItem("nexapro_token", data.token);
+      localStorage.setItem("nexapro_user", JSON.stringify(data.user));
+      router.push("/dashboard");
     } catch (err: any) {
-      setError(err.message || "Login gagal")
+      setError(err.message || "Login gagal");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center px-4 relative overflow-hidden">
@@ -67,13 +67,17 @@ export default function LoginPage() {
       <main className="w-full max-w-md z-10">
         <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border border-white/20">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">Selamat Datang</h1>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">
+              Selamat Datang
+            </h1>
             <p className="text-gray-600">Masuk ke akun NexaPro Anda</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email atau Akun</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email atau Akun
+              </label>
               <div className="relative">
                 <svg
                   className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"
@@ -100,7 +104,9 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Kata Sandi</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Kata Sandi
+              </label>
               <div className="relative">
                 <svg
                   className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"
@@ -136,13 +142,19 @@ export default function LoginPage() {
                 />
                 <span className="ml-2 text-sm text-gray-600">Ingat saya</span>
               </label>
-              <Link href="#" className="text-sm text-[#00d2c6] hover:text-[#00b5ab] transition-colors">
+              <Link
+                href="#"
+                className="text-sm text-[#00d2c6] hover:text-[#00b5ab] transition-colors"
+              >
                 Lupa password?
               </Link>
             </div>
 
             {error && (
-              <div className="bg-red-100 border border-red-200 text-red-800 px-4 py-3 rounded relative" role="alert">
+              <div
+                className="bg-red-100 border border-red-200 text-red-800 px-4 py-3 rounded relative"
+                role="alert"
+              >
                 <strong className="font-bold">Error!</strong>
                 <span className="block sm:inline"> {error}</span>
               </div>
@@ -193,10 +205,7 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <button
-              
-              className="mt-4 w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white hover:bg-gray-50 transition-colors"
-            >
+            <button className="mt-4 w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white hover:bg-gray-50 transition-colors">
               <svg width="20" height="20" viewBox="0 0 24 24" className="mr-3">
                 <path
                   fill="#4285F4"
@@ -215,12 +224,16 @@ export default function LoginPage() {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
-              <span className="text-gray-700 font-medium">Masuk dengan Google</span>
+              <span className="text-gray-700 font-medium">
+                Masuk dengan Google
+              </span>
             </button>
           </div>
 
           <div className="mt-6 p-4 bg-green-50/80 border border-green-200/50 rounded-lg text-center">
-            <p className="text-blue-800 font-medium text-sm mb-1">🎯 Demo Account</p>
+            <p className="text-blue-800 font-medium text-sm mb-1">
+              🎯 Demo Account
+            </p>
             <p className="text-blue-700 text-sm font-mono">admin@nexapro.com</p>
             <p className="text-blue-700 text-sm font-mono">password</p>
           </div>
@@ -257,5 +270,5 @@ export default function LoginPage() {
         }
       `}</style>
     </div>
-  )
+  );
 }

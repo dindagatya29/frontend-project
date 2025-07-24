@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import NotificationSystem from "./notification-system";
 import LogoutConfirmationModal from "./logout-confirmation-modal";
 import ReportsPage from "@/app/dashboard/reports/page";
+import clsx from "clsx";
 
 // Real role access implementation
 const useRoleAccess = () => {
@@ -94,8 +95,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [showProfilePopup, setShowProfilePopup] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
-  
-  
 
   // Add try-catch for useRoleAccess
   let currentUser = null;
@@ -550,25 +549,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </button>
           </div>
           <nav className="flex-1 space-y-1 px-2 py-4">
-            {filteredSidebarItems.map((item) => {
-              const isActive =
-                pathname === item.href || pathname.startsWith(item.href + "/");
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`group flex items-center space-x-3 px-2 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
-                    isActive
-                      ? "bg-green-100 text-green-900"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                  }`}
-                  onClick={() => setSidebarOpen(false)}
-                >
-                  {getIcon(item.icon)}
-                  <span>{item.name}</span>
-                </Link>
-              );
-            })}
+            {filteredSidebarItems.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                className="group flex items-center space-x-3 px-2 py-2 text-sm font-medium rounded-md text-gray-600 active:bg-gray-200 active:text-gray-900 transition-all duration-150 ease-in-out"
+                onClick={() => setSidebarOpen(false)}
+              >
+                {getIcon(item.icon)}
+                <span>{item.name}</span>
+              </Link>
+            ))}
           </nav>
         </div>
       </div>
@@ -586,24 +577,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </span>
           </div>
           <nav className="flex-1 space-y-1 px-2 py-4">
-            {filteredSidebarItems.map((item) => {
-              const isActive =
-                pathname === item.href || pathname.startsWith(item.href + "/");
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`group flex items-center space-x-3 px-2 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
-                    isActive
-                      ? "bg-green-100 text-green-900"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                  }`}
-                >
-                  {getIcon(item.icon)}
-                  <span>{item.name}</span>
-                </Link>
-              );
-            })}
+            {filteredSidebarItems.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                className="group flex items-center space-x-3 px-2 py-2 text-sm font-medium rounded-md text-gray-600 active:bg-gray-200 active:text-gray-900 transition-all duration-150 ease-in-out"
+                onClick={() => setSidebarOpen(false)}
+              >
+                {getIcon(item.icon)}
+                <span>{item.name}</span>
+              </Link>
+            ))}
           </nav>
         </div>
       </div>

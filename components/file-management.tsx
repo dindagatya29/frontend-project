@@ -453,7 +453,7 @@ export default function FileManagement() {
           <div className="flex items-center">
             <div className="w-10 h-10 bg-green-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mr-3">📄</div>
             <div>
-              <div className="text-2xl font-bold text-gray-800 dark:text-white">156</div>
+              <div className="text-2xl font-bold text-gray-800 dark:text-white">{files.length}</div>
               <div className="text-sm text-gray-600 dark:text-gray-300">Total Files</div>
             </div>
           </div>

@@ -1,94 +1,105 @@
-"use client"
+"use client";
 
-import type React from "react"
-import Link from "next/link"
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import type React from "react";
+import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const router = useRouter()
+  const [firstName, setFirstName] = useState("");
+  const [middleName, setMiddleName] = useState("");
+  const [lastName, setLastName] = useState("");
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const router = useRouter();
 
   const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
     if (password !== confirmPassword) {
-      setError("Password tidak cocok")
-      setIsLoading(false)
-      return
+      setError("Password tidak cocok");
+      setIsLoading(false);
+      return;
     }
     try {
       // Hapus fetch csrf-cookie, langsung POST ke register
+      const fullName = [firstName, middleName, lastName]
+        .filter(Boolean)
+        .join(" ");
       const res = await fetch("http://localhost:8000/api/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, email, password, password_confirmation: confirmPassword }),
+        body: JSON.stringify({
+          name: fullName,
+          email,
+          password,
+          password_confirmation: confirmPassword,
+        }),
       });
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        throw new Error(data.message || `HTTP ${res.status}`)
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || `HTTP ${res.status}`);
       }
       // Jika register sukses, redirect ke login
-      router.push("/login")
+      router.push("/login");
     } catch (err: any) {
-      setError(err.message || "Registrasi gagal")
+      setError(err.message || "Registrasi gagal");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleGoogleRegister = () => {
-    localStorage.setItem("isLoggedIn", "true")
-    localStorage.setItem("userEmail", "user@gmail.com")
-    document.cookie = `nexapro_token=demo_token; path=/; max-age=${7 * 24 * 60 * 60}`
-    router.push("/dashboard")
-  }
+    localStorage.setItem("isLoggedIn", "true");
+    localStorage.setItem("userEmail", "user@gmail.com");
+    document.cookie = `nexapro_token=demo_token; path=/; max-age=${
+      7 * 24 * 60 * 60
+    }`;
+    router.push("/dashboard");
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Navigation */}
-      <header className="absolute top-0 left-0 right-0 z-10">
-        <div className="container mx-auto px-6 py-6 flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-3 group">
-            <div className="h-12 w-12 relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-[#00d2c6] to-[#00b5ab] rounded-xl rotate-6 group-hover:rotate-12 transition-transform duration-300"></div>
-              <div className="absolute inset-0 bg-gradient-to-r from-[#00d2c6] to-[#00b5ab] rounded-xl flex items-center justify-center">
-                <span className="text-xl font-bold text-white">N</span>
-              </div>
+      <header className="absolute top-0 left-0 w-full flex justify-between items-center px-8 py-6 z-10">
+        <Link href="/" className="flex items-center space-x-3 group">
+          <div className="h-12 w-12 relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-[#00d2c6] to-[#00b5ab] rounded-xl rotate-6 group-hover:rotate-12 transition-transform duration-300"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-[#00d2c6] to-[#00b5ab] rounded-xl flex items-center justify-center">
+              <span className="text-xl font-bold text-white">N</span>
             </div>
-            <span className="text-2xl font-bold">
-              <span className="text-white">Nexa</span>
-              <span className="text-[#00d2c6]">Pro</span>
-            </span>
-          </Link>
-
-          <div className="flex items-center space-x-4">
-            <span className="text-slate-300 text-sm">Sudah punya akun?</span>
-            <Link
-              href="/login"
-              className="bg-white/10 hover:bg-white/20 text-white px-6 py-2 rounded-lg transition-all duration-200 backdrop-blur-sm border border-white/20"
-            >
-              Masuk
-            </Link>
           </div>
+          <span className="text-2xl font-bold">
+            <span className="text-white">Nexa</span>
+            <span className="text-[#00d2c6]">Pro</span>
+          </span>
+        </Link>
+        <div className="flex items-center space-x-3">
+          <span className="text-white">Sudah Punya Akun</span>
+          <Link href="/login">
+            <button className="bg-[#00d2c6] hover:bg-[#00b5ab] text-white rounded-lg px-6 py-2 transition-colors">
+              Login
+            </button>
+          </Link>
         </div>
       </header>
 
       {/* Main Content */}
-      <div className="flex items-center justify-center min-h-screen px-4 pt-20">
-        <div className="w-full max-w-md">
+      <div className="flex items-center justify-center min-h-screen px-20 pt-20">
+        <div className="w-full max-w-2xl">
           {/* Register Card */}
           <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border border-white/20">
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-slate-800 mb-2">Selamat Datang</h1>
+              <h1 className="text-3xl font-bold text-slate-800 mb-2">
+                Selamat Datang
+              </h1>
               <p className="text-slate-600">Buat akun untuk memulai</p>
             </div>
 
@@ -99,35 +110,61 @@ export default function RegisterPage() {
             )}
 
             <form onSubmit={handleRegister} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Nama Lengkap</label>
-                <div className="relative">
-                  <svg
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zm-4 7a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                    />
-                  </svg>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Nama Depan
+                  </label>
                   <input
                     type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 text-black border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00d2c6] focus:border-transparent transition-all duration-200 bg-white/50"
-                    placeholder="Nama lengkap Anda"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className="w-full pl-4 pr-4 py-3 text-black border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00d2c6] focus:border-transparent transition-all duration-200 bg-white/50"
+                    placeholder="Nama Depan"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Nama Tengah
+                  </label>
+                  <input
+                    type="text"
+                    value={middleName}
+                    onChange={(e) => setMiddleName(e.target.value)}
+                    className="w-full pl-4 pr-4 py-3 text-black border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00d2c6] focus:border-transparent transition-all duration-200 bg-white/50"
+                    placeholder="Nama Tengah"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Nama Belakang
+                  </label>
+                  <input
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className="w-full pl-4 pr-4 py-3 text-black border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00d2c6] focus:border-transparent transition-all duration-200 bg-white/50"
+                    placeholder="Nama Belakang"
                     required
                   />
                 </div>
               </div>
+              {/* <div className="mt-4">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Nama Lengkap
+                </label>
+                <input
+                  type="text"
+                  value={`${firstName} ${middleName} ${lastName}`}
+                  readOnly
+                  className="w-full pl-4 pr-4 py-3 text-black bg-gray-100 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00d2c6] focus:border-transparent transition-all duration-200"
+                /> */}
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Alamat Email</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Alamat Email
+                </label>
                 <div className="relative">
                   <svg
                     className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5"
@@ -154,7 +191,9 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Kata Sandi</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Kata Sandi
+                </label>
                 <div className="relative">
                   <svg
                     className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5"
@@ -181,7 +220,9 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Konfirmasi Kata Sandi</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Konfirmasi Kata Sandi
+                </label>
                 <div className="relative">
                   <svg
                     className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5"
@@ -274,7 +315,9 @@ export default function RegisterPage() {
                     d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                   />
                 </svg>
-                <span className="text-slate-700 font-medium">Daftar dengan Google</span>
+                <span className="text-slate-700 font-medium">
+                  Daftar dengan Google
+                </span>
               </button>
             </div>
           </div>
@@ -293,5 +336,5 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

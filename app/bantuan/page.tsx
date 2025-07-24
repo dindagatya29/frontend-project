@@ -75,8 +75,9 @@ export default function BantuanPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#1a2a3a] to-[#0f1a25] text-white">
       {/* Navigation */}
-      <header className="container mx-auto px-4 py-6">
-        <nav className="flex items-center justify-between bg-white/5 rounded-xl px-6 py-4 border border-white/10">
+      <header className="fixed top-0 left-0 z-50 w-full bg-transparent backdrop-blur-sm">
+       <nav className="flex items-center justify-between backdrop-blur-sm bg-white/5 px-4 sm:px-6 py-3 sm:py-4 border border-white/10">
+
           <div className="flex items-center space-x-8">
             <div className="flex-1"></div>
             <Link href="/" className="flex items-center space-x-3">
@@ -112,7 +113,7 @@ export default function BantuanPage() {
             </Link>
           </div>
         </nav>
-      </header>
+      </header><br /><br />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16">

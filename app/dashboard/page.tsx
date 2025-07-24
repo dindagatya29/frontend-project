@@ -1,21 +1,21 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import NewProjectModal from "@/components/new-project-modal"
-import AddTaskModal from "@/components/add-task-modal"
-import QuickEditTaskModal from "@/components/quick-edit-task-modal"
-import { useProjects } from "@/hooks/use-projects"
-import { useTasks } from "@/hooks/use-tasks"
-import { Loader2, AlertCircle, RefreshCw } from "lucide-react"
+import { useState, useEffect } from "react";
+import NewProjectModal from "@/components/new-project-modal";
+import AddTaskModal from "@/components/add-task-modal";
+import QuickEditTaskModal from "@/components/quick-edit-task-modal";
+import { useProjects } from "@/hooks/use-projects";
+import { useTasks } from "@/hooks/use-tasks";
+import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
 
 export default function DashboardPage() {
-  const [activeTab, setActiveTab] = useState("Project")
-  const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false)
-  const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false)
-  const [isQuickEditModalOpen, setIsQuickEditModalOpen] = useState(false)
-  const [selectedTask, setSelectedTask] = useState<any>(null)
-  const [currentUser, setCurrentUser] = useState<any>(null)
-  const [userPermissions, setUserPermissions] = useState<string[]>([])
+  const [activeTab, setActiveTab] = useState("Project");
+  const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false);
+  const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
+  const [isQuickEditModalOpen, setIsQuickEditModalOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [userPermissions, setUserPermissions] = useState<string[]>([]);
 
   // 🔗 Hooks untuk data real dari backend
   const {
@@ -27,7 +27,7 @@ export default function DashboardPage() {
     updateProject,
     deleteProject,
     refetch: refetchProjects,
-  } = useProjects()
+  } = useProjects();
 
   const {
     tasks,
@@ -40,262 +40,326 @@ export default function DashboardPage() {
     updateTask,
     deleteTask,
     refetch: refetchTasks,
-  } = useTasks()
+  } = useTasks();
 
   // Get current user and permissions
   useEffect(() => {
-    const userStr = localStorage.getItem("nexapro_user")
+    const userStr = localStorage.getItem("nexapro_user");
     if (userStr) {
-      const user = JSON.parse(userStr)
-      setCurrentUser(user)
-      
+      const user = JSON.parse(userStr);
+      setCurrentUser(user);
+
       // Fetch user permissions from backend
       fetch(`http://localhost:8000/api/admin/user-permissions/${user.id}`)
-        .then(res => res.json())
-        .then(data => {
+        .then((res) => res.json())
+        .then((data) => {
           if (data.success && data.data) {
-            setUserPermissions(data.data.map((p: any) => p.name))
+            setUserPermissions(data.data.map((p: any) => p.name));
           }
         })
         .catch(() => {
           // Fallback to role-based permissions if API fails
           const rolePermissions = {
             admin: [
-              "manage_users", "manage_projects", "manage_tasks", "view_reports", 
-              "export_data", "manage_settings", "manage_integrations", "manage_roles",
-              "track_time", "view_projects", "manage_team"
+              "manage_users",
+              "manage_projects",
+              "manage_tasks",
+              "view_reports",
+              "export_data",
+              "manage_settings",
+              "manage_integrations",
+              "manage_roles",
+              "track_time",
+              "view_projects",
+              "manage_team",
             ],
             project_manager: [
-              "manage_projects", "manage_tasks", "assign_tasks", "view_reports",
-              "export_data", "manage_team", "view_time_tracking", "track_time", "view_projects"
+              "manage_projects",
+              "manage_tasks",
+              "assign_tasks",
+              "view_reports",
+              "export_data",
+              "manage_team",
+              "view_time_tracking",
+              "track_time",
+              "view_projects",
             ],
             member: [
-              "view_projects", "manage_own_tasks", "comment_tasks", "upload_files",
-              "track_time", "view_own_reports"
-            ]
-          }
-          setUserPermissions(rolePermissions[user.role as keyof typeof rolePermissions] || [])
-        })
+              "view_projects",
+              "manage_own_tasks",
+              "comment_tasks",
+              "upload_files",
+              "track_time",
+              "view_own_reports",
+            ],
+          };
+          setUserPermissions(
+            rolePermissions[user.role as keyof typeof rolePermissions] || []
+          );
+        });
     }
-  }, [])
+  }, []);
 
   // Real-time synchronization
   useEffect(() => {
     const handleProjectUpdated = (event: CustomEvent) => {
-      console.log("🔄 Real-time project update received in Dashboard:", event.detail)
+      console.log(
+        "🔄 Real-time project update received in Dashboard:",
+        event.detail
+      );
       // Refetch projects and tasks to get latest data
-      refetchProjects()
-      refetchTasks()
-    }
+      refetchProjects();
+      refetchTasks();
+    };
 
     const handleTaskUpdated = (event: CustomEvent) => {
-      console.log("🔄 Real-time task update received in Dashboard:", event.detail)
+      console.log(
+        "🔄 Real-time task update received in Dashboard:",
+        event.detail
+      );
       // Refetch projects and tasks to get latest data
-      refetchProjects()
-      refetchTasks()
-    }
+      refetchProjects();
+      refetchTasks();
+    };
 
     const handleFileUploaded = (event: CustomEvent) => {
-      console.log("🔄 Real-time file upload received in Dashboard:", event.detail)
+      console.log(
+        "🔄 Real-time file upload received in Dashboard:",
+        event.detail
+      );
       // Refetch projects and tasks to get latest data
-      refetchProjects()
-      refetchTasks()
-    }
+      refetchProjects();
+      refetchTasks();
+    };
 
     if (typeof window !== "undefined") {
-      window.addEventListener("projectUpdated", handleProjectUpdated as EventListener)
-      window.addEventListener("taskUpdated", handleTaskUpdated as EventListener)
-      window.addEventListener("fileUploaded", handleFileUploaded as EventListener)
+      window.addEventListener(
+        "projectUpdated",
+        handleProjectUpdated as EventListener
+      );
+      window.addEventListener(
+        "taskUpdated",
+        handleTaskUpdated as EventListener
+      );
+      window.addEventListener(
+        "fileUploaded",
+        handleFileUploaded as EventListener
+      );
       return () => {
-        window.removeEventListener("projectUpdated", handleProjectUpdated as EventListener)
-        window.removeEventListener("taskUpdated", handleTaskUpdated as EventListener)
-        window.removeEventListener("fileUploaded", handleFileUploaded as EventListener)
-      }
+        window.removeEventListener(
+          "projectUpdated",
+          handleProjectUpdated as EventListener
+        );
+        window.removeEventListener(
+          "taskUpdated",
+          handleTaskUpdated as EventListener
+        );
+        window.removeEventListener(
+          "fileUploaded",
+          handleFileUploaded as EventListener
+        );
+      };
     }
-  }, [refetchProjects, refetchTasks])
+  }, [refetchProjects, refetchTasks]);
 
   // Permission check functions
   const hasPermission = (permission: string): boolean => {
-    if (!currentUser) return false
-    if (currentUser.role === "admin") return true // Admin has all permissions
-    return userPermissions.includes(permission)
-  }
+    if (!currentUser) return false;
+    if (currentUser.role === "admin") return true; // Admin has all permissions
+    return userPermissions.includes(permission);
+  };
 
   // 🎨 Helper functions
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Completed":
-        return "bg-green-100 text-green-800 border-green-200"
+        return "bg-green-100 text-green-800 border-green-200";
       case "In Progress":
-        return "bg-green-100 text-blue-800 border-green-200"
+        return "bg-green-100 text-blue-800 border-green-200";
       case "Planning":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200"
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "On Hold":
-        return "bg-gray-100 text-gray-800 border-gray-200"
+        return "bg-gray-100 text-gray-800 border-gray-200";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200"
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
-  }
+  };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "High":
-        return "bg-red-100 text-red-800 border-red-200"
+        return "bg-red-100 text-red-800 border-red-200";
       case "Medium":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200"
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "Low":
-        return "bg-green-100 text-green-800 border-green-200"
+        return "bg-green-100 text-green-800 border-green-200";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200"
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
-  }
+  };
 
   const getProgressColor = (progress: number) => {
-    if (progress === 100) return "bg-teal-500"
-    if (progress >= 75) return "bg-teal-500"
-    if (progress >= 50) return "from-yellow-500 to-yellow-600"
-    if (progress >= 25) return "from-orange-500 to-orange-600"
-    return "from-gray-400 to-gray-500"
-  }
+    if (progress === 100) return "bg-teal-500";
+    if (progress >= 75) return "bg-teal-500";
+    if (progress >= 50) return "from-yellow-500 to-yellow-600";
+    if (progress >= 25) return "from-orange-500 to-orange-600";
+    return "from-gray-400 to-gray-500";
+  };
 
   // 📝 Event handlers
   const handleCreateProject = async (projectData: any) => {
     if (!hasPermission("manage_projects")) {
-      alert("You don't have permission to create projects")
-      return
+      alert("You don't have permission to create projects");
+      return;
     }
-    
+
     try {
-      await createProject(projectData)
-      setIsNewProjectModalOpen(false)
-      console.log("✅ Project created successfully!")
+      await createProject(projectData);
+      setIsNewProjectModalOpen(false);
+      console.log("✅ Project created successfully!");
     } catch (error) {
-      console.error("❌ Failed to create project:", error)
-      alert("Failed to create project. Please try again.")
+      console.error("❌ Failed to create project:", error);
+      alert("Failed to create project. Please try again.");
     }
-  }
+  };
 
   const handleCreateTask = async (taskData: any) => {
     if (!hasPermission("manage_tasks")) {
-      alert("You don't have permission to create tasks")
-      return
+      alert("You don't have permission to create tasks");
+      return;
     }
-    
+
     try {
-      await createTask(taskData)
-      setIsAddTaskModalOpen(false)
-      console.log("✅ Task created successfully!")
+      await createTask(taskData);
+      setIsAddTaskModalOpen(false);
+      console.log("✅ Task created successfully!");
     } catch (error) {
-      console.error("❌ Failed to create task:", error)
-      alert("Failed to create task. Please try again.")
+      console.error("❌ Failed to create task:", error);
+      alert("Failed to create task. Please try again.");
     }
-  }
+  };
 
   const handleQuickEdit = (task: any) => {
     if (!hasPermission("manage_tasks") && !hasPermission("manage_own_tasks")) {
-      alert("You don't have permission to edit tasks")
-      return
+      alert("You don't have permission to edit tasks");
+      return;
     }
-    
-    setSelectedTask(task)
-    setIsQuickEditModalOpen(true)
-  }
+
+    setSelectedTask(task);
+    setIsQuickEditModalOpen(true);
+  };
 
   const handleQuickEditSubmit = async (id: number, updates: any) => {
     if (!hasPermission("manage_tasks") && !hasPermission("manage_own_tasks")) {
-      alert("You don't have permission to edit tasks")
-      return
+      alert("You don't have permission to edit tasks");
+      return;
     }
-    
+
     try {
-      await updateTask(id, updates)
-      setIsQuickEditModalOpen(false)
-      setSelectedTask(null)
-      console.log("✅ Task updated successfully!")
+      await updateTask(id, updates);
+      setIsQuickEditModalOpen(false);
+      setSelectedTask(null);
+      console.log("✅ Task updated successfully!");
     } catch (error) {
-      console.error("❌ Failed to update task:", error)
-      throw error
+      console.error("❌ Failed to update task:", error);
+      throw error;
     }
-  }
+  };
 
   const handleDeleteTask = async (id: number) => {
     if (!hasPermission("manage_tasks")) {
-      alert("You don't have permission to delete tasks")
-      return
+      alert("You don't have permission to delete tasks");
+      return;
     }
-    
+
     if (confirm("Are you sure you want to delete this task?")) {
       try {
-        await deleteTask(id)
-        console.log("✅ Task deleted successfully!")
+        await deleteTask(id);
+        console.log("✅ Task deleted successfully!");
       } catch (error) {
-        console.error("❌ Failed to delete task:", error)
-        alert("Failed to delete task. Please try again.")
+        console.error("❌ Failed to delete task:", error);
+        alert("Failed to delete task. Please try again.");
       }
     }
-  }
+  };
 
-  const handleUpdateProjectStatus = async (projectId: number, newStatus: string) => {
+  const handleUpdateProjectStatus = async (
+    projectId: number,
+    newStatus: string
+  ) => {
     if (!hasPermission("manage_projects")) {
-      alert("You don't have permission to update projects")
-      return
+      alert("You don't have permission to update projects");
+      return;
     }
-    
+
     try {
-      const project = projects.find(p => p.id === projectId)
+      const project = projects.find((p) => p.id === projectId);
       if (!project) {
-        console.error("❌ Project not found")
-        return
+        console.error("❌ Project not found");
+        return;
       }
-      
-      let updates: any = { status: newStatus }
-      
+
+      let updates: any = { status: newStatus };
+
       // Auto-update progress when status is changed to Completed
       if (newStatus === "Completed") {
-        updates.progress = 100
-        console.log(`🔄 Auto-setting progress to 100% for project ${project.name} (status: Completed)`)
+        updates.progress = 100;
+        console.log(
+          `🔄 Auto-setting progress to 100% for project ${project.name} (status: Completed)`
+        );
       }
-      
-      await updateProject(projectId, updates)
-      console.log(`✅ Project status updated to ${newStatus}`)
-      
+
+      await updateProject(projectId, updates);
+      console.log(`✅ Project status updated to ${newStatus}`);
+
       // Trigger real-time update
       if (typeof window !== "undefined") {
-        window.dispatchEvent(new CustomEvent("projectUpdated", {
-          detail: { 
-            projectId, 
-            project: { ...project, ...updates }
-          }
-        }))
+        window.dispatchEvent(
+          new CustomEvent("projectUpdated", {
+            detail: {
+              projectId,
+              project: { ...project, ...updates },
+            },
+          })
+        );
       }
     } catch (error) {
-      console.error("❌ Failed to update project status:", error)
-      alert("Failed to update project status. Please try again.")
+      console.error("❌ Failed to update project status:", error);
+      alert("Failed to update project status. Please try again.");
     }
-  }
+  };
 
   // 📊 Get upcoming deadlines (tasks due in next 14 days)
   const getUpcomingDeadlines = () => {
-    const now = new Date()
-    const twoWeeksFromNow = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000)
+    const now = new Date();
+    const twoWeeksFromNow = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
 
     return tasks
       .filter((task) => {
-        if (!task.dueDate) return false
-        const dueDate = new Date(task.dueDate)
-        return dueDate >= now && dueDate <= twoWeeksFromNow && task.status !== "Completed"
+        if (!task.dueDate) return false;
+        const dueDate = new Date(task.dueDate);
+        return (
+          dueDate >= now &&
+          dueDate <= twoWeeksFromNow &&
+          task.status !== "Completed"
+        );
       })
-      .sort((a, b) => new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime())
-  }
+      .sort(
+        (a, b) =>
+          new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime()
+      );
+  };
 
   // 📋 Group tasks by status
   const getTasksByStatus = () => {
-    const todoTasks = tasks.filter((task) => task.status === "Todo")
-    const inProgressTasks = tasks.filter((task) => task.status === "In Progress")
-    const completedTasks = tasks.filter((task) => task.status === "Completed")
+    const todoTasks = tasks.filter((task) => task.status === "Todo");
+    const inProgressTasks = tasks.filter(
+      (task) => task.status === "In Progress"
+    );
+    const completedTasks = tasks.filter((task) => task.status === "Completed");
 
-    return { todoTasks, inProgressTasks, completedTasks }
-  }
+    return { todoTasks, inProgressTasks, completedTasks };
+  };
 
   const renderProjectView = () => {
     if (projectsLoading) {
@@ -304,7 +368,7 @@ export default function DashboardPage() {
           <Loader2 className="h-8 w-8 animate-spin text-green-600" />
           <span className="ml-2 text-gray-600">Loading projects...</span>
         </div>
-      )
+      );
     }
 
     if (projectsError) {
@@ -323,10 +387,10 @@ export default function DashboardPage() {
             Try Again
           </button>
         </div>
-      )
+      );
     }
 
-    const upcomingDeadlines = getUpcomingDeadlines()
+    const upcomingDeadlines = getUpcomingDeadlines();
 
     return (
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
@@ -336,8 +400,12 @@ export default function DashboardPage() {
             <div className="bg-gradient-to-r from-slate-50 to-gray-50 p-4 sm:p-6 border-b border-gray-100">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-lg sm:text-xl font-bold text-gray-900">Recent Projects</h2>
-                  <p className="text-sm text-gray-600 mt-1">Your active projects overview</p>
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-900">
+                    Recent Projects
+                  </h2>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Your active projects overview
+                  </p>
                 </div>
                 <button
                   onClick={() => (window.location.href = "dashboard/projects")}
@@ -353,8 +421,12 @@ export default function DashboardPage() {
                   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-2xl">📁</span>
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No projects yet</h3>
-                  <p className="text-gray-500 mb-4">Create your first project to get started</p>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No projects yet
+                  </h3>
+                  <p className="text-gray-500 mb-4">
+                    Create your first project to get started
+                  </p>
                   {hasPermission("manage_projects") ? (
                     <button
                       onClick={() => setIsNewProjectModalOpen(true)}
@@ -364,8 +436,12 @@ export default function DashboardPage() {
                     </button>
                   ) : (
                     <div className="text-center">
-                      <p className="text-sm text-gray-500 mb-2">You don't have permission to create projects</p>
-                      <p className="text-xs text-gray-400">Contact your administrator for access</p>
+                      <p className="text-sm text-gray-500 mb-2">
+                        You don't have permission to create projects
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        Contact your administrator for access
+                      </p>
                     </div>
                   )}
                 </div>
@@ -386,34 +462,44 @@ export default function DashboardPage() {
                       </div>
                       <div className="flex items-center space-x-3 flex-shrink-0">
                         <span
-                          className={`text-xs sm:text-sm px-2 sm:px-3 py-1 rounded-full border ${getStatusColor(project.status)}`}
+                          className={`text-xs sm:text-sm px-2 sm:px-3 py-1 rounded-full border ${getStatusColor(
+                            project.status
+                          )}`}
                         >
                           {project.status}
                         </span>
                         {project.due_date && (
                           <span className="text-xs sm:text-sm text-gray-500 bg-gray-100 px-2 sm:px-3 py-1 rounded-full">
-                            Due {new Date(project.due_date).toLocaleDateString()}
+                            Due{" "}
+                            {new Date(project.due_date).toLocaleDateString()}
                           </span>
                         )}
                       </div>
                     </div>
                     <div className="flex items-center space-x-3 mb-4">
                       <span
-                        className={`text-xs sm:text-sm px-2 sm:px-3 py-1 rounded-full border ${getPriorityColor(project.priority)}`}
+                        className={`text-xs sm:text-sm px-2 sm:px-3 py-1 rounded-full border ${getPriorityColor(
+                          project.priority
+                        )}`}
                       >
                         {project.priority} Priority
                       </span>
                       <div className="flex-1 bg-gray-200 rounded-full h-2 sm:h-3 overflow-hidden">
                         <div
-                          className={`bg-gradient-to-r ${getProgressColor(project.progress)} h-2 sm:h-3 rounded-full transition-all duration-500`}
+                          className={`bg-gradient-to-r ${getProgressColor(
+                            project.progress
+                          )} h-2 sm:h-3 rounded-full transition-all duration-500`}
                           style={{ width: `${project.progress}%` }}
                         ></div>
                       </div>
-                      <span className="text-xs sm:text-sm font-bold text-gray-900">{project.progress}%</span>
+                      <span className="text-xs sm:text-sm font-bold text-gray-900">
+                        {project.progress}%
+                      </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="text-xs sm:text-sm text-gray-600">
-                        📋 {project.tasks.total} tasks • ✅ {project.tasks.completed} completed
+                        📋 {project.tasks.total} tasks • ✅{" "}
+                        {project.tasks.completed} completed
                       </div>
                       <div className="flex items-center space-x-2 text-gray-400">
                         <svg
@@ -464,8 +550,12 @@ export default function DashboardPage() {
                   </svg>
                 </div>
                 <div>
-                  <h2 className="text-base sm:text-lg font-bold text-gray-900">Upcoming Deadlines</h2>
-                  <p className="text-xs sm:text-sm text-gray-600">Tasks due in the next 14 days</p>
+                  <h2 className="text-base sm:text-lg font-bold text-gray-900">
+                    Upcoming Deadlines
+                  </h2>
+                  <p className="text-xs sm:text-sm text-gray-600">
+                    Tasks due in the next 14 days
+                  </p>
                 </div>
               </div>
             </div>
@@ -475,8 +565,12 @@ export default function DashboardPage() {
                   <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
                     <span className="text-xl">✅</span>
                   </div>
-                  <p className="text-sm text-gray-600">No upcoming deadlines!</p>
-                  <p className="text-xs text-gray-500 mt-1">You're all caught up</p>
+                  <p className="text-sm text-gray-600">
+                    No upcoming deadlines!
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    You're all caught up
+                  </p>
                 </div>
               ) : (
                 upcomingDeadlines.slice(0, 4).map((task) => (
@@ -486,17 +580,26 @@ export default function DashboardPage() {
                     onClick={() => handleQuickEdit(task)}
                   >
                     <div
-                      className={`w-3 h-3 rounded-full ${getPriorityColor(task.priority).includes("red") ? "bg-red-500" : getPriorityColor(task.priority).includes("yellow") ? "bg-yellow-500" : "bg-green-500"} mt-2 flex-shrink-0 shadow-sm`}
+                      className={`w-3 h-3 rounded-full ${
+                        getPriorityColor(task.priority).includes("red")
+                          ? "bg-red-500"
+                          : getPriorityColor(task.priority).includes("yellow")
+                          ? "bg-yellow-500"
+                          : "bg-green-500"
+                      } mt-2 flex-shrink-0 shadow-sm`}
                     ></div>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-semibold text-gray-900 text-xs sm:text-sm group-hover:text-gray-800 line-clamp-1">
                         {task.title}
                       </h4>
                       <p className="text-xs text-gray-600 mb-2 sm:mb-3 mt-1">
-                        {task.project} • Due {new Date(task.dueDate!).toLocaleDateString()}
+                        {task.project} • Due{" "}
+                        {new Date(task.dueDate!).toLocaleDateString()}
                       </p>
                       <span
-                        className={`inline-block px-2 sm:px-3 py-1 text-xs font-medium rounded-full border ${getPriorityColor(task.priority)}`}
+                        className={`inline-block px-2 sm:px-3 py-1 text-xs font-medium rounded-full border ${getPriorityColor(
+                          task.priority
+                        )}`}
                       >
                         {task.priority}
                       </span>
@@ -508,8 +611,8 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-    )
-  }
+    );
+  };
 
   const renderTaskView = () => {
     if (tasksLoading) {
@@ -518,7 +621,7 @@ export default function DashboardPage() {
           <Loader2 className="h-8 w-8 animate-spin text-green-600" />
           <span className="ml-2 text-gray-600">Loading tasks...</span>
         </div>
-      )
+      );
     }
 
     if (tasksError) {
@@ -537,11 +640,11 @@ export default function DashboardPage() {
             Try Again
           </button>
         </div>
-      )
+      );
     }
 
-    const { todoTasks, inProgressTasks, completedTasks } = getTasksByStatus()
-    const upcomingDeadlines = getUpcomingDeadlines()
+    const { todoTasks, inProgressTasks, completedTasks } = getTasksByStatus();
+    const upcomingDeadlines = getUpcomingDeadlines();
 
     return (
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
@@ -551,50 +654,37 @@ export default function DashboardPage() {
             <div className="bg-gradient-to-r from-green-50 to-green-50 p-4 sm:p-6 border-b border-gray-100">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-lg sm:text-xl font-bold text-gray-900">Task Board</h2>
-                  <p className="text-sm text-gray-600 mt-1">Manage your tasks efficiently</p>
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-900">
+                    Task Board
+                  </h2>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Manage your tasks efficiently
+                  </p>
                 </div>
-                {hasPermission("manage_tasks") && (
-                  <button
-                    className="flex items-center justify-center space-x-2 bg-gradient-to-r from-green-600 to-green-700 text-white px-4 py-2 rounded-lg text-sm hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-lg hover:shadow-xl self-start sm:self-auto"
-                    onClick={() => setIsAddTaskModalOpen(true)}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M5 12h14" />
-                      <path d="M12 5v14" />
-                    </svg>
-                    <span>Add Task</span>
-                  </button>
-                )}
+                {/* Hapus tombol Add Task */}
               </div>
             </div>
+
             <div className="p-4 sm:p-6">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-                {/* To Do Column */}
+                {/* Repeat untuk tiap kolom (To Do, In Progress, Completed) */}
+
                 <div className="space-y-3 sm:space-y-4">
                   <div className="flex items-center space-x-3">
                     <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-gray-400"></div>
-                    <span className="text-sm font-semibold text-gray-700">To Do</span>
+                    <span className="text-sm font-semibold text-gray-700">
+                      To Do
+                    </span>
                     <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full font-medium">
                       {todoTasks.length}
                     </span>
                   </div>
+
                   <div className="space-y-3">
                     {todoTasks.slice(0, 3).map((task) => (
                       <div
                         key={task.id}
-                        className="bg-gray-50 p-3 sm:p-4 rounded-xl border border-gray-100 hover:shadow-md transition-all duration-200 group cursor-pointer"
-                        onClick={() => handleQuickEdit(task)}
+                        className="bg-gray-50 p-3 sm:p-4 rounded-xl border border-gray-100 hover:shadow-md transition-all duration-200 group"
                       >
                         <div className="flex items-center space-x-2 mb-3">
                           <div className="w-2 h-2 rounded-full bg-gray-400"></div>
@@ -602,10 +692,14 @@ export default function DashboardPage() {
                             {task.title}
                           </span>
                         </div>
-                        <p className="text-xs text-gray-600 mb-3">{task.project}</p>
+                        <p className="text-xs text-gray-600 mb-3">
+                          {task.project}
+                        </p>
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                           <span
-                            className={`px-2 py-1 text-xs rounded-full font-medium border self-start ${getPriorityColor(task.priority)}`}
+                            className={`px-2 py-1 text-xs rounded-full font-medium border self-start ${getPriorityColor(
+                              task.priority
+                            )}`}
                           >
                             {task.priority}
                           </span>
@@ -626,109 +720,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* In Progress Column */}
-                <div className="space-y-3 sm:space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-green-500"></div>
-                    <span className="text-sm font-semibold text-gray-700">In Progress</span>
-                    <span className="bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full font-medium">
-                      {inProgressTasks.length}
-                    </span>
-                  </div>
-                  <div className="space-y-3">
-                    {inProgressTasks.slice(0, 3).map((task) => (
-                      <div
-                        key={task.id}
-                        className="bg-green-50 p-3 sm:p-4 rounded-xl border border-green-100 hover:shadow-md transition-all duration-200 group cursor-pointer"
-                        onClick={() => handleQuickEdit(task)}
-                      >
-                        <div className="flex items-center space-x-2 mb-3">
-                          <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                          <span className="text-xs sm:text-sm font-semibold text-gray-800 group-hover:text-gray-900 line-clamp-1">
-                            {task.title}
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-600 mb-3">{task.project}</p>
-                        <div className="mb-3">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-xs text-gray-600">Progress</span>
-                            <span className="text-xs font-medium text-gray-800">{task.progress}%</span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-1">
-                            <div
-                              className="bg-green-500 h-1 rounded-full transition-all duration-500"
-                              style={{ width: `${task.progress}%` }}
-                            ></div>
-                          </div>
-                        </div>
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                          <span
-                            className={`px-2 py-1 text-xs rounded-full font-medium border self-start ${getPriorityColor(task.priority)}`}
-                          >
-                            {task.priority}
-                          </span>
-                          {task.dueDate && (
-                            <span className="text-xs text-gray-500">
-                              Due {new Date(task.dueDate).toLocaleDateString()}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                    {inProgressTasks.length === 0 && (
-                      <div className="text-center py-8 text-gray-500">
-                        <span className="text-2xl mb-2 block">⏳</span>
-                        <p className="text-sm">No tasks in progress</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Completed Column */}
-                <div className="space-y-3 sm:space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-green-500"></div>
-                    <span className="text-sm font-semibold text-gray-700">Completed</span>
-                    <span className="bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full font-medium">
-                      {completedTasks.length}
-                    </span>
-                  </div>
-                  <div className="space-y-3">
-                    {completedTasks.slice(0, 3).map((task) => (
-                      <div
-                        key={task.id}
-                        className="bg-green-50 p-3 sm:p-4 rounded-xl border border-green-100 hover:shadow-md transition-all duration-200 group cursor-pointer"
-                        onClick={() => handleQuickEdit(task)}
-                      >
-                        <div className="flex items-center space-x-2 mb-3">
-                          <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                          <span className="text-xs sm:text-sm font-semibold text-gray-800 group-hover:text-gray-900 line-clamp-1">
-                            {task.title}
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-600 mb-3">{task.project}</p>
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                          <span
-                            className={`px-2 py-1 text-xs rounded-full font-medium border self-start ${getPriorityColor(task.priority)}`}
-                          >
-                            {task.priority}
-                          </span>
-                          {task.dueDate && (
-                            <span className="text-xs text-gray-500">
-                              Completed {new Date(task.dueDate).toLocaleDateString()}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                    {completedTasks.length === 0 && (
-                      <div className="text-center py-8 text-gray-500">
-                        <span className="text-2xl mb-2 block">✅</span>
-                        <p className="text-sm">No completed tasks</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                {/* Ulangi pola di atas untuk In Progress dan Completed */}
               </div>
             </div>
           </div>
@@ -757,8 +749,12 @@ export default function DashboardPage() {
                   </svg>
                 </div>
                 <div>
-                  <h2 className="text-base sm:text-lg font-bold text-gray-900">Upcoming Deadlines</h2>
-                  <p className="text-xs sm:text-sm text-gray-600">Tasks due in the next 14 days</p>
+                  <h2 className="text-base sm:text-lg font-bold text-gray-900">
+                    Upcoming Deadlines
+                  </h2>
+                  <p className="text-xs sm:text-sm text-gray-600">
+                    Tasks due in the next 14 days
+                  </p>
                 </div>
               </div>
             </div>
@@ -768,8 +764,12 @@ export default function DashboardPage() {
                   <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
                     <span className="text-xl">✅</span>
                   </div>
-                  <p className="text-sm text-gray-600">No upcoming deadlines!</p>
-                  <p className="text-xs text-gray-500 mt-1">You're all caught up</p>
+                  <p className="text-sm text-gray-600">
+                    No upcoming deadlines!
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    You're all caught up
+                  </p>
                 </div>
               ) : (
                 upcomingDeadlines.slice(0, 4).map((task) => (
@@ -779,17 +779,26 @@ export default function DashboardPage() {
                     onClick={() => handleQuickEdit(task)}
                   >
                     <div
-                      className={`w-3 h-3 rounded-full ${getPriorityColor(task.priority).includes("red") ? "bg-red-500" : getPriorityColor(task.priority).includes("yellow") ? "bg-yellow-500" : "bg-green-500"} mt-2 flex-shrink-0 shadow-sm`}
+                      className={`w-3 h-3 rounded-full ${
+                        getPriorityColor(task.priority).includes("red")
+                          ? "bg-red-500"
+                          : getPriorityColor(task.priority).includes("yellow")
+                          ? "bg-yellow-500"
+                          : "bg-green-500"
+                      } mt-2 flex-shrink-0 shadow-sm`}
                     ></div>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-semibold text-gray-900 text-xs sm:text-sm group-hover:text-gray-800 line-clamp-1">
                         {task.title}
                       </h4>
                       <p className="text-xs text-gray-600 mb-2 sm:mb-3 mt-1">
-                        {task.project} • Due {new Date(task.dueDate!).toLocaleDateString()}
+                        {task.project} • Due{" "}
+                        {new Date(task.dueDate!).toLocaleDateString()}
                       </p>
                       <span
-                        className={`inline-block px-2 sm:px-3 py-1 text-xs font-medium rounded-full border ${getPriorityColor(task.priority)}`}
+                        className={`inline-block px-2 sm:px-3 py-1 text-xs font-medium rounded-full border ${getPriorityColor(
+                          task.priority
+                        )}`}
                       >
                         {task.priority}
                       </span>
@@ -801,8 +810,8 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-    )
-  }
+    );
+  };
 
   const renderTeamView = () => (
     <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
@@ -831,7 +840,9 @@ export default function DashboardPage() {
                 </svg>
               </div>
               <div>
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900">Team Members</h2>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900">
+                  Team Members
+                </h2>
                 <p className="text-sm text-gray-600">Your project team</p>
               </div>
             </div>
@@ -842,8 +853,12 @@ export default function DashboardPage() {
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-2xl">👥</span>
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No team members</h3>
-                <p className="text-gray-500">Add team members to collaborate on projects</p>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No team members
+                </h3>
+                <p className="text-gray-500">
+                  Add team members to collaborate on projects
+                </p>
               </div>
             ) : (
               users.map((user, index) => (
@@ -856,12 +871,12 @@ export default function DashboardPage() {
                       index % 5 === 0
                         ? "from-green-400 to-blue-500"
                         : index % 5 === 1
-                          ? "from-green-400 to-green-500"
-                          : index % 5 === 2
-                            ? "from-purple-400 to-purple-500"
-                            : index % 5 === 3
-                              ? "from-pink-400 to-pink-500"
-                              : "from-yellow-400 to-yellow-500"
+                        ? "from-green-400 to-green-500"
+                        : index % 5 === 2
+                        ? "from-purple-400 to-purple-500"
+                        : index % 5 === 3
+                        ? "from-pink-400 to-pink-500"
+                        : "from-yellow-400 to-yellow-500"
                     } rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-lg flex-shrink-0 shadow-lg`}
                   >
                     {user.name.charAt(0).toUpperCase()}
@@ -871,10 +886,16 @@ export default function DashboardPage() {
                       <span className="font-semibold text-gray-900 group-hover:text-gray-800 text-sm sm:text-base">
                         {user.name}
                       </span>
-                      <span className="text-gray-600 text-sm">{user.email}</span>
+                      <span className="text-gray-600 text-sm">
+                        {user.email}
+                      </span>
                     </div>
                     <p className="text-xs sm:text-sm text-gray-600">
-                      {tasks.filter((task) => task.assignee_id === user.id).length} assigned tasks
+                      {
+                        tasks.filter((task) => task.assignee_id === user.id)
+                          .length
+                      }{" "}
+                      assigned tasks
                     </p>
                   </div>
                 </div>
@@ -907,68 +928,60 @@ export default function DashboardPage() {
                 </svg>
               </div>
               <div>
-                <h2 className="text-base sm:text-lg font-bold text-gray-900">Team Performance</h2>
-                <p className="text-xs sm:text-sm text-gray-600">Current overview</p>
+                <h2 className="text-base sm:text-lg font-bold text-gray-900">
+                  Team Performance
+                </h2>
+                <p className="text-xs sm:text-sm text-gray-600">
+                  Current overview
+                </p>
               </div>
             </div>
           </div>
           <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
             <div className="text-center">
-              <div className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{users.length}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+                {users.length}
+              </div>
               <div className="text-sm text-gray-600">Team Members</div>
               <div className="text-xs text-green-600 font-medium">Active</div>
             </div>
             <div className="space-y-3 sm:space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Tasks Completed</span>
-                <span className="font-semibold text-gray-900">{taskStats?.completed || 0}</span>
+                <span className="font-semibold text-gray-900">
+                  {taskStats?.completed || 0}
+                </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Projects Active</span>
-                <span className="font-semibold text-gray-900">{projectStats?.in_progress || 0}</span>
+                <span className="font-semibold text-gray-900">
+                  {projectStats?.in_progress || 0}
+                </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Total Tasks</span>
-                <span className="font-semibold text-gray-900">{taskStats?.total || 0}</span>
+                <span className="font-semibold text-gray-900">
+                  {taskStats?.total || 0}
+                </span>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 
   return (
     <div className="space-y-6 sm:space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-1">Welcome back! Here's what's happening with your projects.</p>
-        </div>
-        <div className="flex items-center space-x-3">
-          {hasPermission("manage_projects") && (
-            <button
-              onClick={() => setIsNewProjectModalOpen(true)}
-              className="flex items-center justify-center space-x-2 bg-gradient-to-r from-green-600 to-green-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-lg hover:shadow-xl w-full sm:w-auto"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M5 12h14" />
-                <path d="M12 5v14" />
-              </svg>
-              <span className="font-medium">New Project</span>
-            </button>
-          )}
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            Dashboard
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Welcome back! Here's what's happening with your projects.
+          </p>
         </div>
       </div>
 
@@ -995,9 +1008,13 @@ export default function DashboardPage() {
               </svg>
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-bold mb-2">{projectStats?.total || 0}</div>
+          <div className="text-2xl sm:text-3xl font-bold mb-2">
+            {projectStats?.total || 0}
+          </div>
           <div className="text-blue-100 text-sm">Total Projects</div>
-          <div className="text-xs text-blue-200 mt-1">{projectStats?.in_progress || 0} active</div>
+          <div className="text-xs text-blue-200 mt-1">
+            {projectStats?.in_progress || 0} active
+          </div>
         </div>
 
         {/* Pending Task Card */}
@@ -1025,7 +1042,9 @@ export default function DashboardPage() {
             {(taskStats?.todo || 0) + (taskStats?.in_progress || 0)}
           </div>
           <div className="text-orange-100 text-sm">Pending Tasks</div>
-          <div className="text-xs text-orange-200 mt-1">{getUpcomingDeadlines().length} due soon</div>
+          <div className="text-xs text-orange-200 mt-1">
+            {getUpcomingDeadlines().length} due soon
+          </div>
         </div>
 
         {/* Completed Tasks Card */}
@@ -1049,9 +1068,13 @@ export default function DashboardPage() {
               </svg>
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-bold mb-2">{taskStats?.completed || 0}</div>
+          <div className="text-2xl sm:text-3xl font-bold mb-2">
+            {taskStats?.completed || 0}
+          </div>
           <div className="text-green-100 text-sm">Completed Tasks</div>
-          <div className="text-xs text-green-200 mt-1">{projectStats?.completed || 0} projects done</div>
+          <div className="text-xs text-green-200 mt-1">
+            {projectStats?.completed || 0} projects done
+          </div>
         </div>
 
         {/* Team Members Card */}
@@ -1077,7 +1100,9 @@ export default function DashboardPage() {
               </svg>
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-bold mb-2">{users.length}</div>
+          <div className="text-2xl sm:text-3xl font-bold mb-2">
+            {users.length}
+          </div>
           <div className="text-purple-100 text-sm">Team Members</div>
           <div className="text-xs text-purple-200 mt-1">All active</div>
         </div>
@@ -1145,13 +1170,13 @@ export default function DashboardPage() {
         <QuickEditTaskModal
           isOpen={isQuickEditModalOpen}
           onClose={() => {
-            setIsQuickEditModalOpen(false)
-            setSelectedTask(null)
+            setIsQuickEditModalOpen(false);
+            setSelectedTask(null);
           }}
           onSubmit={handleQuickEditSubmit}
           task={selectedTask}
         />
       )}
     </div>
-  )
+  );
 }
