@@ -104,7 +104,7 @@ export default function SettingsPage() {
       setCurrentUser(user)
       
       // Fetch user permissions from backend
-      fetch(`http://localhost:8000/api/admin/user-permissions/${user.id}`)
+      fetch(`https://nexapro.web.id/api/admin/user-permissions/${user.id}`)
         .then(res => res.json())
         .then(data => {
           if (data.success && data.data) {
@@ -156,7 +156,7 @@ export default function SettingsPage() {
   // Load statistics
   const loadStatistics = async () => {
     try {
-      const response = await fetch("http://localhost:8000/api/admin/settings/statistics")
+      const response = await fetch("https://nexapro.web.id/api/admin/settings/statistics")
       if (response.ok) {
         const data = await response.json()
         if (data.success) {
@@ -183,7 +183,7 @@ export default function SettingsPage() {
       localStorage.setItem("nexapro_settings", JSON.stringify(settings))
       
       // Save to backend (if API exists)
-      await fetch("http://localhost:8000/api/admin/settings", {
+      await fetch("https://nexapro.web.id/api/admin/settings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(settings),
@@ -298,10 +298,10 @@ export default function SettingsPage() {
     try {
       // Fetch data from multiple endpoints
       const [projectsRes, tasksRes, usersRes, filesRes] = await Promise.all([
-        fetch("http://localhost:8000/api/projects"),
-        fetch("http://localhost:8000/api/tasks"),
-        fetch("http://localhost:8000/api/users"),
-        fetch("http://localhost:8000/api/files")
+        fetch("https://nexapro.web.id/api/projects"),
+        fetch("https://nexapro.web.id/api/tasks"),
+        fetch("https://nexapro.web.id/api/users"),
+        fetch("https://nexapro.web.id/api/files")
       ])
 
       const projectsData = await projectsRes.json()
@@ -834,7 +834,7 @@ export default function SettingsPage() {
 
     setBackupLoading(true)
     try {
-      const response = await fetch("http://localhost:8000/api/admin/settings/backup", {
+      const response = await fetch("https://nexapro.web.id/api/admin/settings/backup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       })

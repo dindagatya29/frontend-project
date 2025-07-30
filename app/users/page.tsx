@@ -13,7 +13,7 @@ export default function UsersPage() {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        const res = await fetch('http://localhost:8000/api/users');
+        const res = await fetch('https://nexapro.web.id/api/users');
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
         }

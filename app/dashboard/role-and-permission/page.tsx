@@ -63,7 +63,7 @@ export default function RoleAndPermissionPage() {
     }
 
     // Fetch users
-    fetch("http://localhost:8000/api/admin/users/with-role")
+    fetch("https://nexapro.web.id/api/admin/users/with-role")
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data.data)) {
@@ -84,7 +84,7 @@ export default function RoleAndPermissionPage() {
   useEffect(() => {
     if (currentUser?.role !== "admin") return;
     
-    fetch("http://localhost:8000/api/admin/permissions")
+    fetch("https://nexapro.web.id/api/admin/permissions")
       .then((res) => res.json())
       .then((data) => {
         if (data.success && Array.isArray(data.data)) {
@@ -102,7 +102,7 @@ export default function RoleAndPermissionPage() {
   useEffect(() => {
     if (!selectedRole || currentUser?.role !== "admin") return;
     setLoading(true);
-    fetch(`http://localhost:8000/api/admin/role-permissions/${selectedRole}`)
+    fetch(`https://nexapro.web.id/api/admin/role-permissions/${selectedRole}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success && Array.isArray(data.data)) {
@@ -121,7 +121,7 @@ export default function RoleAndPermissionPage() {
 
   // Update user role
   const handleRoleChange = (userId: number, newRole: string) => {
-    fetch(`http://localhost:8000/api/admin/users/${userId}/role`, {
+    fetch(`https://nexapro.web.id/api/admin/users/${userId}/role`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ role: newRole }),
@@ -162,7 +162,7 @@ export default function RoleAndPermissionPage() {
   // Save permissions
   const handleSavePermissions = () => {
     setSaving(true);
-    fetch(`http://localhost:8000/api/admin/role-permissions/${selectedRole}`, {
+    fetch(`https://nexapro.web.id/api/admin/role-permissions/${selectedRole}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -318,7 +318,7 @@ export default function RoleAndPermissionPage() {
                             handlePermissionToggle(perm.id, val);
                             
                             // Update backend
-                            fetch(`http://localhost:8000/api/admin/role-permissions/${selectedRole}`, {
+                            fetch(`https://nexapro.web.id/api/admin/role-permissions/${selectedRole}`, {
                               method: "POST",
                               headers: { "Content-Type": "application/json" },
                               body: JSON.stringify({

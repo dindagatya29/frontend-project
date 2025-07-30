@@ -15,15 +15,15 @@ export default function ReportsPage() {
         setLoading(true)
         setError(null)
         // Fetch projects
-        const resProjects = await fetch("http://localhost:8000/api/projects")
+        const resProjects = await fetch("https://nexapro.web.id/api/projects")
         const dataProjects = await resProjects.json()
         setProjects(dataProjects.data || [])
         // Fetch tasks
-        const resTasks = await fetch("http://localhost:8000/api/tasks")
+        const resTasks = await fetch("https://nexapro.web.id/api/tasks")
         const dataTasks = await resTasks.json()
         setTasks(dataTasks.data || [])
         // Fetch team stats
-        const resTeam = await fetch("http://localhost:8000/api/team/stats")
+        const resTeam = await fetch("https://nexapro.web.id/api/team/stats")
         const dataTeam = await resTeam.json()
         setTeamStats(dataTeam.data || null)
       } catch (err) {

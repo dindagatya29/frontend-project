@@ -95,7 +95,7 @@ export default function TeamPage() {
       setCurrentUser(user);
 
       // Fetch user permissions from backend
-      fetch(`http://localhost:8000/api/admin/user-permissions/${user.id}`)
+      fetch(`https://nexapro.web.id/api/admin/user-permissions/${user.id}`)
         .then((res) => res.json())
         .then((data) => {
           if (data.success && data.data) {
@@ -162,14 +162,14 @@ export default function TeamPage() {
     setLoading(true);
     try {
       // Load team members
-      const membersRes = await fetch("http://localhost:8000/api/team");
+      const membersRes = await fetch("https://nexapro.web.id/api/team");
       const membersData = await membersRes.json();
       if (membersData.success) {
         setTeamMembers(membersData.data || []);
       }
 
       // Load departments
-      const deptRes = await fetch("http://localhost:8000/api/team/departments");
+      const deptRes = await fetch("https://nexapro.web.id/api/team/departments");
       const deptData = await deptRes.json();
       if (deptData.success) {
         setDepartments(deptData.data || []);
@@ -248,7 +248,7 @@ export default function TeamPage() {
 
     try {
       const response = await fetch(
-        "http://localhost:8000/api/team/departments",
+        "https://nexapro.web.id/api/team/departments",
         {
           method: "GET",
           headers: {
@@ -299,7 +299,7 @@ export default function TeamPage() {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/team/departments/${editingDepartment.id}`,
+        `https://nexapro.web.id/api/team/departments/${editingDepartment.id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -358,7 +358,7 @@ export default function TeamPage() {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/team/departments/${deptId}`,
+        `https://nexapro.web.id/api/team/departments/${deptId}`,
         {
           method: "DELETE",
         }
@@ -382,7 +382,7 @@ export default function TeamPage() {
     }
 
     try {
-      const response = await fetch("http://localhost:8000/api/team", {
+      const response = await fetch("https://nexapro.web.id/api/team", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(memberForm),
@@ -438,7 +438,7 @@ export default function TeamPage() {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/team/${editingMember.id}`,
+        `https://nexapro.web.id/api/team/${editingMember.id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -501,7 +501,7 @@ export default function TeamPage() {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/team/${memberId}`,
+        `https://nexapro.web.id/api/team/${memberId}`,
         {
           method: "DELETE",
         }

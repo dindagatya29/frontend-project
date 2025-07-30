@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 
-const API_BASE_URL = "http://localhost:8000/api"
+const API_BASE_URL = "https://nexapro.web.id/api"
 
 interface Notification {
   id: number

@@ -4,9 +4,12 @@ import "./globals.css"
 import { RoleProvider } from "@/components/role-access-control"
 
 export const metadata: Metadata = {
-  title: "v0 App",
+  title: "NexaProject",
   description: "Created with v0",
   generator: "v0.dev",
+  icons: {
+    icon: "/pro.png", // ← Tambahkan ini
+  },
 }
 
 export default function RootLayout({

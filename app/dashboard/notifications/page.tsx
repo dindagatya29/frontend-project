@@ -98,7 +98,7 @@ export default function NotificationsPage() {
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
   const API_BASE =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+    process.env.NEXT_PUBLIC_API_URL || "https://nexapro.web.id/api";
 
   const fetchNotifications = async () => {
     try {
@@ -398,7 +398,7 @@ export default function NotificationsPage() {
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 text-black"
           >
             <option value="all">All Types</option>
             <option value="task">Tasks</option>
@@ -411,7 +411,7 @@ export default function NotificationsPage() {
           <select
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 text-black"
           >
             <option value="all">All Priorities</option>
             <option value="high">High</option>
@@ -422,7 +422,7 @@ export default function NotificationsPage() {
           <select
             value={readFilter}
             onChange={(e) => setReadFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 text-black"
           >
             <option value="all">All Status</option>
             <option value="unread">Unread</option>
@@ -437,7 +437,7 @@ export default function NotificationsPage() {
                 placeholder="Search notifications..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 text-black"
               />
             </div>
           </div>

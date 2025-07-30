@@ -31,7 +31,7 @@ export default function RegisterPage() {
       const fullName = [firstName, middleName, lastName]
         .filter(Boolean)
         .join(" ");
-      const res = await fetch("http://localhost:8000/api/register", {
+      const res = await fetch("https://nexapro.web.id/api/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

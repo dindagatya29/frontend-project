@@ -21,7 +21,7 @@ const useRoleAccess = () => {
       setCurrentUser(user);
 
       // Fetch user permissions from backend
-      fetch(`http://localhost:8000/api/admin/user-permissions/${user.id}`)
+      fetch(`https://nexapro.web.id/api/admin/user-permissions/${user.id}`)
         .then((res) => res.json())
         .then((data) => {
           if (data.success && data.data) {

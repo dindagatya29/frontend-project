@@ -502,12 +502,7 @@ body {
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+  
 }
 
 @keyframes float {
@@ -543,5 +538,4 @@ html {
 ::-webkit-scrollbar-thumb:hover {
   background: rgb(245, 245, 245);
 }
-
 

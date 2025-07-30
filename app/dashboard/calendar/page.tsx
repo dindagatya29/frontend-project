@@ -16,7 +16,7 @@ export default function CalendarPage() {
   // Fetch custom events dari backend
   const fetchCustomEvents = async () => {
     try {
-      const res = await fetch("http://localhost:8000/api/custom-events");
+      const res = await fetch("https://nexapro.web.id/api/custom-events");
       const data = await res.json();
       if (Array.isArray(data.data)) setCustomEvents(data.data);
     } catch {
@@ -41,8 +41,8 @@ useEffect(() => {
   const fetchProjectsTasks = async () => {
     try {
       const [projectsRes, tasksRes] = await Promise.all([
-        fetch("http://localhost:8000/api/projects"),
-        fetch("http://localhost:8000/api/tasks"),
+        fetch("https://nexapro.web.id/api/projects"),
+        fetch("https://nexapro.web.id/api/tasks"),
       ]);
       const projectsData = await projectsRes.json();
       const tasksData = await tasksRes.json();
@@ -89,8 +89,8 @@ useEffect(() => {
     const fetchEvents = async () => {
       try {
         const [projectsRes, tasksRes] = await Promise.all([
-          fetch("http://localhost:8000/api/projects"),
-          fetch("http://localhost:8000/api/tasks"),
+          fetch("https://nexapro.web.id/api/projects"),
+          fetch("https://nexapro.web.id/api/tasks"),
         ]);
         const projectsData = await projectsRes.json();
         const tasksData = await tasksRes.json();
@@ -682,7 +682,7 @@ useEffect(() => {
     progress: number;
   }) => {
     try {
-      const res = await fetch("http://localhost:8000/api/custom-events", {
+      const res = await fetch("https://nexapro.web.id/api/custom-events", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

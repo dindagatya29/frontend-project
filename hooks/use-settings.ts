@@ -91,7 +91,7 @@ export function useSettings() {
 
       // Try to load from backend
       try {
-        const response = await fetch("http://localhost:8000/api/admin/settings")
+        const response = await fetch("https://nexapro.web.id/api/admin/settings")
         if (response.ok) {
           const data = await response.json()
           if (data.success && data.data) {
@@ -124,7 +124,7 @@ export function useSettings() {
       
       // Try to save to backend
       try {
-        const response = await fetch("http://localhost:8000/api/admin/settings", {
+        const response = await fetch("https://nexapro.web.id/api/admin/settings", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(updatedSettings),
@@ -154,7 +154,7 @@ export function useSettings() {
       
       // Try to reset on backend
       try {
-        await fetch("http://localhost:8000/api/admin/settings", {
+        await fetch("https://nexapro.web.id/api/admin/settings", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(defaultSettings),
@@ -175,7 +175,7 @@ export function useSettings() {
     try {
       setError(null)
       
-      const response = await fetch("http://localhost:8000/api/admin/settings/export", {
+      const response = await fetch("https://nexapro.web.id/api/admin/settings/export", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type, format }),
@@ -198,7 +198,7 @@ export function useSettings() {
     try {
       setError(null)
       
-      const response = await fetch("http://localhost:8000/api/admin/settings/backup", {
+      const response = await fetch("https://nexapro.web.id/api/admin/settings/backup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       })
@@ -220,7 +220,7 @@ export function useSettings() {
     try {
       setError(null)
       
-      const response = await fetch("http://localhost:8000/api/admin/settings/statistics")
+      const response = await fetch("https://nexapro.web.id/api/admin/settings/statistics")
       
       if (!response.ok) {
         throw new Error("Failed to get statistics")

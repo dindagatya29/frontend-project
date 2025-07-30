@@ -115,7 +115,7 @@ export default function FileManagement() {
     const fetchFiles = async () => {
       try {
         const token = getToken();
-        const res = await fetch('http://localhost:8000/api/files', {
+        const res = await fetch('https://nexapro.web.id/api/files', {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         const data = await res.json();
@@ -132,8 +132,8 @@ export default function FileManagement() {
             tags: f.tags || [],
             version: f.version,
             isLatest: f.is_latest,
-            downloadUrl: `http://localhost:8000/api/files/${f.id}/download`,
-            previewUrl: `http://localhost:8000/api/files/${f.id}/preview`,
+            downloadUrl: `https://nexapro.web.id/api/files/${f.id}/download`,
+            previewUrl: `https://nexapro.web.id/api/files/${f.id}/preview`,
           })));
         }
       } catch (error) {
@@ -158,7 +158,7 @@ export default function FileManagement() {
     selectedFiles.forEach((file) => formData.append('files[]', file));
     const token = getToken();
     try {
-      const res = await fetch('http://localhost:8000/api/files', {
+      const res = await fetch('https://nexapro.web.id/api/files', {
         method: 'POST',
         body: formData,
         headers: token ? { 
@@ -180,8 +180,8 @@ export default function FileManagement() {
           tags: f.tags || [],
           version: f.version,
           isLatest: f.is_latest,
-          downloadUrl: `http://localhost:8000/api/files/${f.id}/download`,
-          previewUrl: `http://localhost:8000/api/files/${f.id}/preview`,
+          downloadUrl: `https://nexapro.web.id/api/files/${f.id}/download`,
+          previewUrl: `https://nexapro.web.id/api/files/${f.id}/preview`,
         }))]);
 
         // Log activity for file uploads
@@ -330,7 +330,7 @@ export default function FileManagement() {
       async () => {
         const token = getToken();
         try {
-          const res = await fetch(`http://localhost:8000/api/files/${fileId}`, {
+          const res = await fetch(`https://nexapro.web.id/api/files/${fileId}`, {
             method: 'DELETE',
             headers: token ? { Authorization: `Bearer ${token}` } : {},
           });
@@ -354,7 +354,7 @@ export default function FileManagement() {
     setFiles(prev => prev.filter(f => f.id !== fileId)); // Optimistic update
     const token = getToken();
     try {
-      const res = await fetch(`http://localhost:8000/api/files/${fileId}`, {
+      const res = await fetch(`https://nexapro.web.id/api/files/${fileId}`, {
         method: 'DELETE',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
@@ -364,7 +364,7 @@ export default function FileManagement() {
         const fetchFiles = async () => {
           try {
             const token = getToken();
-            const res = await fetch('http://localhost:8000/api/files', {
+            const res = await fetch('https://nexapro.web.id/api/files', {
               headers: token ? { Authorization: `Bearer ${token}` } : {},
             });
             const data = await res.json();
@@ -381,8 +381,8 @@ export default function FileManagement() {
                 tags: f.tags || [],
                 version: f.version,
                 isLatest: f.is_latest,
-                downloadUrl: `http://localhost:8000/api/files/${f.id}/download`,
-                previewUrl: `http://localhost:8000/api/files/${f.id}/preview`,
+                downloadUrl: `https://nexapro.web.id/api/files/${f.id}/download`,
+                previewUrl: `https://nexapro.web.id/api/files/${f.id}/preview`,
               })));
             }
           } catch (error) {
@@ -397,7 +397,7 @@ export default function FileManagement() {
       const fetchFiles = async () => {
         try {
           const token = getToken();
-          const res = await fetch('http://localhost:8000/api/files', {
+          const res = await fetch('https://nexapro.web.id/api/files', {
             headers: token ? { Authorization: `Bearer ${token}` } : {},
           });
           const data = await res.json();
@@ -414,8 +414,8 @@ export default function FileManagement() {
               tags: f.tags || [],
               version: f.version,
               isLatest: f.is_latest,
-              downloadUrl: `http://localhost:8000/api/files/${f.id}/download`,
-              previewUrl: `http://localhost:8000/api/files/${f.id}/preview`,
+              downloadUrl: `https://nexapro.web.id/api/files/${f.id}/download`,
+              previewUrl: `https://nexapro.web.id/api/files/${f.id}/preview`,
             })));
           }
         } catch (error) {

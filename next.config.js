@@ -13,14 +13,14 @@ const nextConfig = {
     domains: ["localhost", "127.0.0.1"],
   },
   env: {
-    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api",
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api",
+    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || "https://nexapro.web.id/api",
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || "https://nexapro.web.id/api",
   },
   async rewrites() {
     return [
       {
         source: "/api/:path*",
-        destination: "http://localhost:8000/api/:path*",
+        destination: "https://nexapro.web.id/api/:path*",
       },
     ]
   },

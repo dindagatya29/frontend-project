@@ -79,7 +79,7 @@ export default function TaskDetailPage() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`http://localhost:8000/api/tasks/${taskId}`);
+        const res = await fetch(`https://nexapro.web.id/api/tasks/${taskId}`);
         const data = await res.json();
         if (data.success && data.data) {
           setTask(data.data);
