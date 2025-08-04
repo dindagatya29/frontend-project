@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: "Created with v0",
   generator: "v0.dev",
   icons: {
-    icon: "/pro.png", // ← Tambahkan ini
+    icon: "/nexapro.ico", // ← Tambahkan ini
   },
 }
 

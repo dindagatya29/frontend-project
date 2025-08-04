@@ -95,7 +95,7 @@ export default function TeamPage() {
       setCurrentUser(user);
 
       // Fetch user permissions from backend
-      fetch(`https://nexapro.web.id/api/admin/user-permissions/${user.id}`)
+      fetch(`/api/admin/user-permissions/${user.id}`)
         .then((res) => res.json())
         .then((data) => {
           if (data.success && data.data) {
@@ -501,7 +501,7 @@ export default function TeamPage() {
 
     try {
       const response = await fetch(
-        `https://nexapro.web.id/api/team/${memberId}`,
+        `hhttps://nexapro.web.id/api/team/${memberId}`,
         {
           method: "DELETE",
         }

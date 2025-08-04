@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from "react"
 const API_BASE_URL = "https://nexapro.web.id/api"
 
 interface Task {
+  action: any
   id: number
   title: string
   description?: string
@@ -14,6 +15,7 @@ interface Task {
   assignee_id?: number
   status: "Todo" | "In Progress" | "Completed"
   priority: "Low" | "Medium" | "High"
+  
   dueDate?: string
   due_date?: string
   progress: number
@@ -326,6 +328,7 @@ export function useTasks() {
     due_date?: string
     progress?: number
     tags?: string[]
+    todo_list?: { text: string; checked: boolean }[]; // ✅ Tambahkan ini
   }) => {
     try {
       if (!taskData.title || taskData.title.trim() === "") {

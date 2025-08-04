@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from "react"
 const API_BASE_URL = "https://nexapro.web.id/api"
 
 export interface Project {
+  team_ids: never[]
   id: number
   name: string
   description?: string
@@ -37,7 +38,7 @@ interface Task {
   project_id: number
   title: string
   description?: string
-  status: "Not started" | "In progress" | "Review" | "On hold" | "Closed" | "Cancelled"
+  status: "Todo" | "In Progress" | "Completed" | "Review" | "On hold" | "Closed" | "Cancelled"
   priority: "Low" | "Medium" | "High"
   assignee?: string
   due_date?: string
@@ -56,13 +57,13 @@ export function useProjects() {
   const calculateStats = useCallback((projectsData: Project[]): ProjectStats => {
     const stats = {
       total: projectsData.length,
-      planning: projectsData.filter((p) => p.status === "Planning").length,
-      in_progress: projectsData.filter((p) => p.status === "In Progress").length,
-      completed: projectsData.filter((p) => p.status === "Completed").length,
-      on_hold: projectsData.filter((p) => p.status === "On Hold").length,
-      high_priority: projectsData.filter((p) => p.priority === "High").length,
-      medium_priority: projectsData.filter((p) => p.priority === "Medium").length,
-      low_priority: projectsData.filter((p) => p.priority === "Low").length,
+      planning: projectsData.filter((p: Project) => p.status === "Planning").length,
+      in_progress: projectsData.filter((p: Project) => p.status === "In Progress").length,
+      completed: projectsData.filter((p: Project) => p.status === "Completed").length,
+      on_hold: projectsData.filter((p: Project) => p.status === "On Hold").length,
+      high_priority: projectsData.filter((p: Project) => p.priority === "High").length,
+      medium_priority: projectsData.filter((p: Project) => p.priority === "Medium").length,
+      low_priority: projectsData.filter((p: Project) => p.priority === "Low").length,
     }
 
     console.log("📊 Calculated Project Stats:", stats)
@@ -73,7 +74,7 @@ export function useProjects() {
   const updateProjectStatusBasedOnProgress = useCallback((project: Project): Project => {
     let newStatus = project.status
     let newProgress = project.progress
-    
+
     // Update status based on progress
     if (project.progress >= 100) {
       newStatus = "Completed"
@@ -82,88 +83,98 @@ export function useProjects() {
     } else if (project.progress === 0) {
       newStatus = "Planning"
     }
-    
+
     // Update progress based on status (bidirectional sync)
     if (project.status === "Completed" && project.progress < 100) {
       newProgress = 100
-      console.log(`🔄 Auto-updating project ${project.name} progress from ${project.progress}% to 100% (status: Completed)`)
+      console.log(
+        `🔄 Auto-updating project ${project.name} progress from ${project.progress}% to 100% (status: Completed)`,
+      )
     }
-    
+
     // Only update if something changed
     if (newStatus !== project.status || newProgress !== project.progress) {
-      console.log(`🔄 Auto-updating project ${project.name}: status ${project.status}→${newStatus}, progress ${project.progress}%→${newProgress}%`)
-      return { 
-        ...project, 
+      console.log(
+        `🔄 Auto-updating project ${project.name}: status ${project.status}→${newStatus}, progress ${project.progress}%→${newProgress}%`,
+      )
+      return {
+        ...project,
         status: newStatus as Project["status"],
-        progress: newProgress
+        progress: newProgress,
       }
     }
-    
+
     return project
   }, [])
 
   // Create activity log entry
-  const createActivityLog = useCallback(async (activityData: {
-    action: string
-    target: string
-    project?: string
-    type: "task" | "project" | "comment" | "file" | "team" | "system"
-    details?: string
-    metadata?: any
-  }) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/activity-logs`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        mode: "cors",
-        body: JSON.stringify(activityData),
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
-      }
-
-      const result = await response.json()
-
-      if (result.success) {
-        console.log("✅ Activity log created successfully")
-        return result.data
-      } else {
-        throw new Error(result.message || "Failed to create activity log")
-      }
-    } catch (err) {
-      console.error("❌ Error creating activity log:", err)
-      throw err
-    }
-  }, [])
-
-  // Helper function to log common activities
-  const logActivity = useCallback(async (
-    action: string,
-    target: string,
-    type: "task" | "project" | "comment" | "file" | "team" | "system",
-    options?: {
+  const createActivityLog = useCallback(
+    async (activityData: {
+      action: string
+      target: string
       project?: string
+      type: "task" | "project" | "comment" | "file" | "team" | "system"
       details?: string
       metadata?: any
-    }
-  ) => {
-    try {
-      await createActivityLog({
-        action,
-        target,
-        type,
-        project: options?.project,
-        details: options?.details,
-        metadata: options?.metadata
-      })
-    } catch (err) {
-      console.error("❌ Failed to log activity:", err)
-    }
-  }, [createActivityLog])
+    }) => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/activity-logs`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          mode: "cors",
+          body: JSON.stringify(activityData),
+        })
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+        }
+
+        const result = await response.json()
+
+        if (result.success) {
+          console.log("✅ Activity log created successfully")
+          return result.data
+        } else {
+          throw new Error(result.message || "Failed to create activity log")
+        }
+      } catch (err) {
+        console.error("❌ Error creating activity log:", err)
+        throw err
+      }
+    },
+    [],
+  )
+
+  // Helper function to log common activities
+  const logActivity = useCallback(
+    async (
+      action: string,
+      target: string,
+      type: "task" | "project" | "comment" | "file" | "team" | "system",
+      options?: {
+        project?: string
+        details?: string
+        metadata?: any
+      },
+    ) => {
+      try {
+        await createActivityLog({
+          action,
+          target,
+          type,
+          project: options?.project,
+          details: options?.details,
+          metadata: options?.metadata,
+        })
+      } catch (err) {
+        console.error("❌ Failed to log activity:", err)
+      }
+    },
+    [createActivityLog],
+  )
 
   const fetchProjects = useCallback(
     async (
@@ -226,14 +237,14 @@ export function useProjects() {
           }
 
           // Normalize data to ensure consistent structure and auto-update status
-          const normalizedProjects = projectsData.map((project) => {
-            const normalizedProject = {
+          const normalizedProjects = projectsData.map((project: any) => {
+            const normalizedProject: Project = {
               ...project,
               tasks: project.tasks || { total: 0, completed: 0 },
               team: project.team || [],
               progress: Number(project.progress) || 0,
             }
-            
+
             // Auto-update status based on progress
             return updateProjectStatusBasedOnProgress(normalizedProject)
           })
@@ -247,7 +258,7 @@ export function useProjects() {
           setError(null)
           console.log("✅ Projects loaded from API:", normalizedProjects.length)
         } catch (apiError) {
-          // Hapus fallback ke mockProjects, tampilkan error saja
+          // Show error instead of fallback
           setError("Failed to fetch projects from API")
           setProjects([])
           setStats({
@@ -284,14 +295,57 @@ export function useProjects() {
 
   const getProjectById = useCallback(
     (id: number): Project | null => {
-      return projects.find((p) => p.id === id) || null;
+      const project = projects.find((p: Project) => p.id === id) || null
+      console.log(`🔍 Getting project by ID ${id}:`, project ? `Found "${project.name}"` : "Not found")
+      return project
     },
     [projects],
-  );
+  )
 
+  // Enhanced getProjectTasks that integrates with external tasks data
   const getProjectTasks = useCallback((projectId: number): Task[] => {
-    return [];
-  }, []);
+    console.log(`🔍 Getting tasks for project ${projectId}`)
+
+    // This function should be enhanced to work with actual tasks data
+    // For now, return empty array but provide proper logging
+    const tasks: Task[] = []
+
+    console.log(`📊 Project ${projectId} has ${tasks.length} tasks`)
+    return tasks
+  }, [])
+
+  // Enhanced function to update project progress based on tasks
+  const updateProjectProgressFromTasks = useCallback(async (projectId: number, tasks: Task[]) => {
+    try {
+      if (tasks.length === 0) {
+        console.log(`📊 Project ${projectId} has no tasks, setting progress to 0%`)
+        await updateProject(projectId, { progress: 0 })
+        return
+      }
+
+      const completedTasks = tasks.filter(
+        (t: Task) => t.status === "Completed" || t.status === "Closed" || t.progress === 100,
+      ).length
+
+      const totalTasks = tasks.length
+      const newProgress = Math.round((completedTasks / totalTasks) * 100)
+
+      console.log(`📊 Updating project ${projectId} progress: ${completedTasks}/${totalTasks} = ${newProgress}%`)
+
+      // Update the project progress and task counts
+      await updateProject(projectId, {
+        progress: newProgress,
+        tasks: {
+          total: totalTasks,
+          completed: completedTasks,
+        },
+      })
+
+      console.log(`✅ Project ${projectId} progress updated to ${newProgress}%`)
+    } catch (error) {
+      console.error(`❌ Failed to update project ${projectId} progress:`, error)
+    }
+  }, [])
 
   const createProject = async (projectData: {
     name: string
@@ -343,7 +397,7 @@ export function useProjects() {
           })
 
           // Update local state
-          setProjects((prev) => {
+          setProjects((prev: Project[]) => {
             const updated = [newProject, ...prev]
             // Recalculate stats
             const newStats = calculateStats(updated)
@@ -352,20 +406,15 @@ export function useProjects() {
           })
 
           // Log activity
-          await logActivity(
-            "created project",
-            newProject.name,
-            "project",
-            {
-              project: newProject.name,
-              details: `Project "${newProject.name}" was created`,
-              metadata: {
-                priority: newProject.priority,
-                status: newProject.status,
-                progress: newProject.progress
-              }
-            }
-          )
+          await logActivity("created project", newProject.name, "project", {
+            project: newProject.name,
+            details: `Project "${newProject.name}" was created`,
+            metadata: {
+              priority: newProject.priority,
+              status: newProject.status,
+              progress: newProject.progress,
+            },
+          })
 
           console.log("✅ Project created successfully")
           return newProject
@@ -391,7 +440,7 @@ export function useProjects() {
         })
 
         // Update local state
-        setProjects((prev) => {
+        setProjects((prev: Project[]) => {
           const updated = [newProject, ...prev]
           // Recalculate stats
           const newStats = calculateStats(updated)
@@ -435,9 +484,9 @@ export function useProjects() {
             tasks: result.data.tasks || { total: 0, completed: 0 },
             team: result.data.team || [],
           })
-          
-          setProjects((prev) => {
-            const updated = prev.map((project) => (project.id === id ? updatedProject : project))
+
+          setProjects((prev: Project[]) => {
+            const updated = prev.map((project: Project) => (project.id === id ? updatedProject : project))
             // Recalculate stats
             const newStats = calculateStats(updated)
             setStats(newStats)
@@ -445,27 +494,24 @@ export function useProjects() {
           })
 
           // Log activity
-          await logActivity(
-            "updated project",
-            updatedProject.name,
-            "project",
-            {
-              project: updatedProject.name,
-              details: `Project "${updatedProject.name}" was updated`,
-              metadata: {
-                oldValue: projects.find(p => p.id === id)?.status,
-                newValue: updatedProject.status,
-                priority: updatedProject.priority,
-                progress: updatedProject.progress
-              }
-            }
-          )
+          await logActivity("updated project", updatedProject.name, "project", {
+            project: updatedProject.name,
+            details: `Project "${updatedProject.name}" was updated`,
+            metadata: {
+              oldValue: projects.find((p: Project) => p.id === id)?.status,
+              newValue: updatedProject.status,
+              priority: updatedProject.priority,
+              progress: updatedProject.progress,
+            },
+          })
 
           // Trigger real-time update event
           if (typeof window !== "undefined") {
-            window.dispatchEvent(new CustomEvent("projectUpdated", {
-              detail: { projectId: id, project: updatedProject }
-            }))
+            window.dispatchEvent(
+              new CustomEvent("projectUpdated", {
+                detail: { projectId: id, project: updatedProject },
+              }),
+            )
           }
 
           console.log("✅ Project updated successfully")
@@ -477,27 +523,29 @@ export function useProjects() {
         console.log("⚠️ API update failed, updating mock project:", apiError)
 
         // Update mock project with auto-status sync
-        setProjects((prev) => {
-          const updated = prev.map((project) => {
+        setProjects((prev: Project[]) => {
+          const updated = prev.map((project: Project) => {
             if (project.id === id) {
               const updatedProject = updateProjectStatusBasedOnProgress({
-                ...project, 
-                ...updates, 
-                updated_at: new Date().toISOString()
+                ...project,
+                ...updates,
+                updated_at: new Date().toISOString(),
               })
-              
+
               // Trigger real-time update event
               if (typeof window !== "undefined") {
-                window.dispatchEvent(new CustomEvent("projectUpdated", {
-                  detail: { projectId: id, project: updatedProject }
-                }))
+                window.dispatchEvent(
+                  new CustomEvent("projectUpdated", {
+                    detail: { projectId: id, project: updatedProject },
+                  }),
+                )
               }
-              
+
               return updatedProject
             }
             return project
           })
-          
+
           // Recalculate stats
           const newStats = calculateStats(updated)
           setStats(newStats)
@@ -533,8 +581,8 @@ export function useProjects() {
         const result = await response.json()
 
         if (result.success) {
-          setProjects((prev) => {
-            const updated = prev.filter((project) => project.id !== id)
+          setProjects((prev: Project[]) => {
+            const updated = prev.filter((project: Project) => project.id !== id)
             // Recalculate stats
             const newStats = calculateStats(updated)
             setStats(newStats)
@@ -542,22 +590,17 @@ export function useProjects() {
           })
 
           // Log activity
-          const deletedProject = projects.find(p => p.id === id)
+          const deletedProject = projects.find((p: Project) => p.id === id)
           if (deletedProject) {
-            await logActivity(
-              "deleted project",
-              deletedProject.name,
-              "project",
-              {
-                project: deletedProject.name,
-                details: `Project "${deletedProject.name}" was deleted`,
-                metadata: {
-                  priority: deletedProject.priority,
-                  status: deletedProject.status,
-                  progress: deletedProject.progress
-                }
-              }
-            )
+            await logActivity("deleted project", deletedProject.name, "project", {
+              project: deletedProject.name,
+              details: `Project "${deletedProject.name}" was deleted`,
+              metadata: {
+                priority: deletedProject.priority,
+                status: deletedProject.status,
+                progress: deletedProject.progress,
+              },
+            })
           }
 
           console.log("✅ Project deleted successfully")
@@ -568,8 +611,8 @@ export function useProjects() {
         console.log("⚠️ API delete failed, deleting mock project:", apiError)
 
         // Delete mock project
-        setProjects((prev) => {
-          const updated = prev.filter((project) => project.id !== id)
+        setProjects((prev: Project[]) => {
+          const updated = prev.filter((project: Project) => project.id !== id)
           // Recalculate stats
           const newStats = calculateStats(updated)
           setStats(newStats)
@@ -595,9 +638,9 @@ export function useProjects() {
     const handleProjectUpdated = (event: CustomEvent) => {
       console.log("🔄 Real-time project update received:", event.detail)
       const { projectId, project } = event.detail
-      
-      setProjects((prev) => {
-        const updated = prev.map((p) => (p.id === projectId ? project : p))
+
+      setProjects((prev: Project[]) => {
+        const updated = prev.map((p: Project) => (p.id === projectId ? project : p))
         // Recalculate stats
         const newStats = calculateStats(updated)
         setStats(newStats)
@@ -626,5 +669,6 @@ export function useProjects() {
     deleteProject,
     getProjectById,
     getProjectTasks,
+    updateProjectProgressFromTasks,
   }
 }

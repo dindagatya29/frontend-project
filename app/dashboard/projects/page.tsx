@@ -1,669 +1,579 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import NewProjectModal from "@/components/new-project-modal";
-import { useProjects, type Project } from "@/hooks/use-projects";
+"use client"
+import type React from "react"
+import { useState } from "react"
+import Link from "next/link"
+import { useProjects } from "@/hooks/use-projects"
+import { useTasks } from "@/hooks/use-tasks"
 import {
-  Loader2,
-  AlertCircle,
-  RefreshCw,
+  Plus,
+  Search,
+  Edit,
+  Trash2,
   Calendar,
   Users,
   BarChart3,
-  Trash2,
-  Edit,
-} from "lucide-react";
-import { useTasks } from "@/hooks/use-tasks";
-import { useRouter } from "next/navigation";
+  CheckCircle,
+  AlertCircle,
+  Pause,
+  Grid3X3,
+  List,
+  Eye,
+  X,
+  Flag,
+  Filter,
+  SortAsc,
+  Target,
+  Activity,
+} from "lucide-react"
+import EditProjectModal from "@/components/edit-project-modal"
+import NewProjectModal from "@/components/new-project-modal"
+
+interface TeamMember {
+  name: string
+}
+
+interface NewProjectFormType {
+  name: string
+  description: string
+  status: string
+  priority: string
+  due_date: string
+  progress: number
+  invite: string
+  team: TeamMember[]
+}
 
 export default function ProjectsPage() {
-  const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [priorityFilter, setPriorityFilter] = useState("all");
-  const [isEditProjectModalOpen, setIsEditProjectModalOpen] = useState(false);
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
-  const [currentUser, setCurrentUser] = useState<any>(null);
-  const [userPermissions, setUserPermissions] = useState<string[]>([]);
-  const router = useRouter();
+  const { projects, loading, error, stats, refetch, createProject, updateProject, deleteProject } = useProjects()
+  const { users } = useTasks()
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const [searchTerm, setSearchTerm] = useState("")
+  const [statusFilter, setStatusFilter] = useState("all")
+  const [priorityFilter, setPriorityFilter] = useState("all")
+  const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false)
+  const [isEditProjectModalOpen, setIsEditProjectModalOpen] = useState(false)
+  const [selectedProject, setSelectedProject] = useState<any>(null)
 
-  // 🔗 Hook untuk koneksi dengan backend API
-  const {
-    projects,
-    loading,
-    error,
-    stats,
-    createProject,
-    updateProject,
-    deleteProject,
-    refetch,
-  } = useProjects();
-  const { tasks: allTasks } = useTasks();
+  // New Project Form State
+  const [newProjectForm, setNewProjectForm] = useState({
+    name: "",
+    description: "",
+    status: "Planning" as const,
+    priority: "Medium" as const,
+    due_date: "",
+    progress: 0,
+    invite: "",
+    team: [] as TeamMember[],
+  })
+  const [formErrors, setFormErrors] = useState<any>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errorMsg, setErrorMsg] = useState("")
 
-  // Get current user and permissions
-  useEffect(() => {
-    const userStr = localStorage.getItem("nexapro_user");
-    if (userStr) {
-      const user = JSON.parse(userStr);
-      setCurrentUser(user);
+  const handleEditProject = (project: any) => {
+    console.log("🔧 Opening edit modal for project:", project)
+    setSelectedProject(project)
+    setIsEditProjectModalOpen(true)
+  }
 
-      // Fetch user permissions from backend
-      fetch(`https://nexapro.web.id/api/admin/user-permissions/${user.id}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.success && data.data) {
-            setUserPermissions(data.data.map((p: any) => p.name));
-          }
-        })
-        .catch(() => {
-          // Fallback to role-based permissions if API fails
-          const rolePermissions = {
-            admin: [
-              "manage_users",
-              "manage_projects",
-              "manage_tasks",
-              "view_reports",
-              "export_data",
-              "manage_settings",
-              "manage_integrations",
-              "manage_roles",
-              "track_time",
-              "view_projects",
-              "manage_team",
-            ],
-            project_manager: [
-              "manage_projects",
-              "manage_tasks",
-              "assign_tasks",
-              "view_reports",
-              "export_data",
-              "manage_team",
-              "view_time_tracking",
-              "track_time",
-              "view_projects",
-            ],
-            member: [
-              "view_projects",
-              "manage_own_tasks",
-              "comment_tasks",
-              "upload_files",
-              "track_time",
-              "view_own_reports",
-            ],
-          };
-          setUserPermissions(
-            rolePermissions[user.role as keyof typeof rolePermissions] || []
-          );
-        });
+  const handleUpdateProject = async (projectId: number, updates: any) => {
+    try {
+      console.log("💾 Updating project:", projectId, updates)
+      await updateProject(projectId, updates)
+      await refetch()
+      console.log("✅ Project updated successfully")
+    } catch (error) {
+      console.error("❌ Error updating project:", error)
+      throw error
     }
-  }, []);
+  }
 
-  // Real-time synchronization
-  useEffect(() => {
-    const handleProjectUpdated = (event: CustomEvent) => {
-      console.log(
-        "🔄 Real-time project update received in Projects page:",
-        event.detail
-      );
-      // Refetch projects to get latest data
-      refetch();
-    };
-
-    const handleTaskUpdated = (event: CustomEvent) => {
-      console.log(
-        "🔄 Real-time task update received in Projects page:",
-        event.detail
-      );
-      // Refetch projects to get latest data (tasks might affect project progress)
-      refetch();
-    };
-
-    if (typeof window !== "undefined") {
-      window.addEventListener(
-        "projectUpdated",
-        handleProjectUpdated as EventListener
-      );
-      window.addEventListener(
-        "taskUpdated",
-        handleTaskUpdated as EventListener
-      );
-      return () => {
-        window.removeEventListener(
-          "projectUpdated",
-          handleProjectUpdated as EventListener
-        );
-        window.removeEventListener(
-          "taskUpdated",
-          handleTaskUpdated as EventListener
-        );
-      };
+  const handleDeleteProject = async (project: any) => {
+    const confirmMessage = `Are you sure you want to delete "${project.name}"?\n\nThis action cannot be undone and will remove:\n• All project data\n• Associated tasks\n• Team assignments`
+    if (window.confirm(confirmMessage)) {
+      try {
+        await deleteProject(project.id)
+        console.log("✅ Project deleted successfully")
+      } catch (error) {
+        console.error("❌ Error deleting project:", error)
+        alert("Failed to delete project. Please try again.")
+      }
     }
-  }, [refetch]);
+  }
 
-  // Permission check functions
-  const hasPermission = (permission: string): boolean => {
-    if (!currentUser) return false;
-    if (currentUser.role === "admin") return true; // Admin has all permissions
-    return userPermissions.includes(permission);
-  };
-
-  // 🎨 Helper functions untuk styling
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Completed":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "In Progress":
-        return "bg-green-100 text-blue-800 border-green-200";
-      case "Planning":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "On Hold":
-        return "bg-gray-100 text-gray-800 border-gray-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "High":
-        return "bg-red-100 text-red-800 border-red-200";
-      case "Medium":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "Low":
-        return "bg-green-100 text-green-800 border-green-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
-  const getPriorityIcon = (priority: string) => {
-    switch (priority) {
-      case "High":
-        return "🔴";
-      case "Medium":
-        return "🟡";
-      case "Low":
-        return "🟢";
-      default:
-        return "⚪";
-    }
-  };
+  // Filter projects based on search and filters
+  const filteredProjects = projects.filter((project) => {
+    const matchesSearch =
+      project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (project.description && project.description.toLowerCase().includes(searchTerm.toLowerCase()))
+    const matchesStatus = statusFilter === "all" || project.status === statusFilter
+    const matchesPriority = priorityFilter === "all" || project.priority === priorityFilter
+    return matchesSearch && matchesStatus && matchesPriority
+  })
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "Completed":
-        return "✅";
+        return <CheckCircle className="w-4 h-4 text-emerald-600" />
       case "In Progress":
-        return "🔄";
+        return <Activity className="w-4 h-4 text-blue-600" />
       case "Planning":
-        return "📋";
+        return <Target className="w-4 h-4 text-amber-600" />
       case "On Hold":
-        return "⏸️";
+        return <Pause className="w-4 h-4 text-slate-600" />
       default:
-        return "📋";
+        return <AlertCircle className="w-4 h-4 text-slate-400" />
     }
-  };
-
-  // 📝 Event handlers
-  const handleCreateProject = async (projectData: any) => {
-    if (!hasPermission("manage_projects")) {
-      alert("You don't have permission to create projects");
-      return;
-    }
-
-    try {
-      await createProject(projectData);
-      setIsNewProjectModalOpen(false);
-      console.log("✅ Project created successfully!");
-    } catch (error) {
-      console.error("❌ Failed to create project:", error);
-      alert("Failed to create project. Please try again.");
-    }
-  };
-
-  const handleDeleteProject = async (id: number) => {
-    if (!hasPermission("manage_projects")) {
-      alert("You don't have permission to delete projects");
-      return;
-    }
-
-    if (confirm("Are you sure you want to delete this project?")) {
-      try {
-        await deleteProject(id);
-        console.log("✅ Project deleted successfully!");
-      } catch (error) {
-        console.error("❌ Failed to delete project:", error);
-        alert("Failed to delete project. Please try again.");
-      }
-    }
-  };
-
-  const handleUpdateProjectStatus = async (
-    projectId: number,
-    newStatus: string
-  ) => {
-    if (!hasPermission("manage_projects")) {
-      alert("You don't have permission to update projects");
-      return;
-    }
-
-    try {
-      const project = projects.find((p) => p.id === projectId);
-      if (!project) {
-        console.error("❌ Project not found");
-        return;
-      }
-
-      let updates: any = { status: newStatus };
-
-      // Auto-update progress when status is changed to Completed
-      if (newStatus === "Completed") {
-        updates.progress = 100;
-        console.log(
-          `🔄 Auto-setting progress to 100% for project ${project.name} (status: Completed)`
-        );
-      }
-
-      await updateProject(projectId, updates);
-      console.log(`✅ Project status updated to ${newStatus}`);
-
-      // Trigger real-time update
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(
-          new CustomEvent("projectUpdated", {
-            detail: {
-              projectId,
-              project: { ...project, ...updates },
-            },
-          })
-        );
-      }
-    } catch (error) {
-      console.error("❌ Failed to update project status:", error);
-      alert("Failed to update project status. Please try again.");
-    }
-  };
-
-  const handleFilterChange = (type: "status" | "priority", value: string) => {
-    if (type === "status") {
-      setStatusFilter(value);
-    } else {
-      setPriorityFilter(value);
-    }
-
-    // 🔄 Refetch dengan filter baru
-    refetch({
-      status: type === "status" ? value : statusFilter,
-      priority: type === "priority" ? value : priorityFilter,
-    });
-  };
-
-  // Helper untuk hitung progress akumulasi task
-  function getProjectProgress(projectId: number) {
-    const projectTasks = allTasks.filter((t) => t.project_id === projectId);
-    if (projectTasks.length === 0) return 0;
-    const totalProgress = projectTasks.reduce(
-      (sum, t) => sum + (t.progress || 0),
-      0
-    );
-    return Math.round(totalProgress / projectTasks.length);
   }
 
-  function getProjectStatus(projectId: number) {
-    const progress = getProjectProgress(projectId);
-    if (progress === 100) return "Completed";
-    if (progress === 0) return "Planning";
-    return "In Progress";
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case "High":
+        return "bg-red-50 text-red-700 border-red-200 ring-red-100"
+      case "Medium":
+        return "bg-amber-50 text-amber-700 border-amber-200 ring-amber-100"
+      case "Low":
+        return "bg-emerald-50 text-emerald-700 border-emerald-200 ring-emerald-100"
+      default:
+        return "bg-slate-50 text-slate-700 border-slate-200 ring-slate-100"
+    }
   }
 
-  // 🔄 Loading state
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "Completed":
+        return "bg-emerald-50 text-emerald-700 border-emerald-200 ring-emerald-100"
+      case "In Progress":
+        return "bg-blue-50 text-blue-700 border-blue-200 ring-blue-100"
+      case "Planning":
+        return "bg-amber-50 text-amber-700 border-amber-200 ring-amber-100"
+      case "On Hold":
+        return "bg-slate-50 text-slate-700 border-slate-200 ring-slate-100"
+      default:
+        return "bg-slate-50 text-slate-700 border-slate-200 ring-slate-100"
+    }
+  }
+
+  const getProgressColor = (progress: number) => {
+    if (progress >= 80) return "from-emerald-500 to-emerald-600"
+    if (progress >= 50) return "from-blue-500 to-blue-600"
+    if (progress >= 25) return "from-amber-500 to-amber-600"
+    return "from-slate-400 to-slate-500"
+  }
+
+  // Validate form
+  const validateForm = () => {
+    const errors: any = {}
+    if (!newProjectForm.name.trim()) {
+      errors.name = "Project name is required"
+    }
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  // Handle form input changes
+  const handleInputChange = (field: string, value: string | number) => {
+    setNewProjectForm((prev) => ({ ...prev, [field]: value }))
+    if (formErrors[field]) {
+      setFormErrors((prev: any) => ({ ...prev, [field]: undefined }))
+    }
+  }
+
+  // Handle form submission
+  const handleSubmitNewProject = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!validateForm()) {
+      return
+    }
+    setIsSubmitting(true)
+    setErrorMsg("")
+    try {
+      const inviteList = newProjectForm.invite
+        .split(",")
+        .map((email) => email.trim())
+        .filter((email) => email !== "")
+      const teamEmails = [...new Set([...newProjectForm.team.map((t) => t.name), ...inviteList])]
+      const matchedTeam = users
+        .filter((user) => teamEmails.includes(user.email))
+        .map((user) => ({
+          id: user.id,
+          role: "Member",
+        }))
+      const payload = {
+        ...newProjectForm,
+        invite: inviteList,
+        team: matchedTeam,
+      }
+      console.log("🧠 Payload to send:", payload)
+      await createProject(payload)
+      setNewProjectForm({
+        name: "",
+        description: "",
+        status: "Planning",
+        priority: "Medium",
+        due_date: "",
+        progress: 0,
+        invite: "",
+        team: [],
+      })
+      setIsNewProjectModalOpen(false)
+      await refetch()
+    } catch (error: any) {
+      console.error("❌ Error creating project:", error)
+      setErrorMsg(error.message || "Failed to create project. Please try again.")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Handle modal close
+  const handleCloseNewProjectModal = () => {
+    setIsNewProjectModalOpen(false)
+    setNewProjectForm({
+      name: "",
+      description: "",
+      status: "Planning",
+      priority: "Medium",
+      due_date: "",
+      progress: 0,
+      invite: "",
+      team: [],
+    })
+    setFormErrors({})
+    setErrorMsg("")
+  }
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-green-600" />
-        <span className="ml-2 text-gray-600">Loading projects...</span>
+      <div className="flex flex-col items-center justify-center h-96 space-y-6">
+        <div className="relative">
+          <div className="w-16 h-16 border-4 border-blue-200 rounded-full animate-spin"></div>
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
+        </div>
+        <div className="text-center space-y-2">
+          <h3 className="text-xl font-semibold text-slate-900">Loading Projects</h3>
+          <p className="text-slate-600">Please wait while we fetch your projects...</p>
+        </div>
       </div>
-    );
+    )
   }
 
-  // ❌ Error state dengan retry option
   if (error) {
     return (
-      <div className="text-center p-8">
-        <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-        <div className="text-red-600 mb-4">
-          <h3 className="text-lg font-semibold mb-2">Connection Error</h3>
-          <p className="text-sm">{error}</p>
-        </div>
-        <div className="space-x-2">
-          <button
-            onClick={() => refetch()}
-            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 inline-flex items-center"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Try Again
-          </button>
-          <button
-            onClick={() => window.location.reload()}
-            className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700"
-          >
-            Reload Page
-          </button>
-        </div>
-        <div className="mt-4 text-xs text-gray-500">
-          <p>
-            Make sure your Laravel server is running on https://nexapro.web.id
-          </p>
+      <div className="text-center py-16">
+        <div className="max-w-md mx-auto">
+          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <AlertCircle className="h-10 w-10 text-red-600" />
+          </div>
+          <h3 className="text-2xl font-semibold text-slate-900 mb-3">Connection Error</h3>
+          <p className="text-slate-600 mb-8">{error}</p>
+          <div className="space-y-4">
+            <button
+              onClick={() => refetch()}
+              className="w-full bg-blue-600 text-white px-8 py-4 rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 font-medium"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={() => window.location.reload()}
+              className="w-full bg-slate-600 text-white px-8 py-4 rounded-xl hover:bg-slate-700 transition-colors font-medium"
+            >
+              Reload Page
+            </button>
+          </div>
+          <p className="text-xs text-slate-500 mt-6">Make sure your server is running and accessible</p>
         </div>
       </div>
-    );
+    )
   }
 
-  // 📊 Grid view component
   const renderGridView = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {projects.map((project) => (
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+      {filteredProjects.map((project) => (
         <div
           key={project.id}
-          className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 hover:border-green-200"
+          className="group bg-white rounded-2xl border border-slate-200 p-8 hover:shadow-xl transition-all duration-300 hover:border-blue-300 hover:-translate-y-1"
         >
-          {/* Header */}
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-1">
+          {/* Header with Actions */}
+          <div className="flex items-start justify-between mb-6">
+            <div className="flex-1 min-w-0">
+              <h3
+                className="text-xl font-bold text-slate-900 mb-3 truncate group-hover:text-blue-600 transition-colors"
+                title={project.name}
+              >
                 {project.name}
               </h3>
-              <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                {project.description || "No description"}
+              <p className="text-slate-600 line-clamp-2 leading-relaxed">
+                {project.description || "No description provided"}
               </p>
             </div>
-            <div className="flex items-center space-x-1">
-              {hasPermission("manage_projects") && (
-                <>
-                  <button
-                    onClick={() => {
-                      setEditingProject(project);
-                      setIsEditProjectModalOpen(true);
-                    }}
-                    className="text-gray-400 hover:text-green-600 p-1 rounded transition-colors"
-                    title="Edit project"
-                  >
-                    <Edit size={16} />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteProject(project.id)}
-                    className="text-gray-400 hover:text-red-600 p-1 rounded transition-colors"
-                    title="Delete project"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </>
-              )}
+            <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
+              <button
+                onClick={() => handleEditProject(project)}
+                className="p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200"
+                title="Edit project"
+              >
+                <Edit className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => handleDeleteProject(project)}
+                className="p-3 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200"
+                title="Delete project"
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
             </div>
           </div>
-
-          {/* Status & Priority */}
-          <div className="flex items-center space-x-2 mb-4">
-            <span
-              className={`px-3 py-1 text-xs rounded-full border ${getStatusColor(
-                getProjectStatus(project.id)
+          {/* Status & Priority Badges */}
+          <div className="flex items-center gap-3 mb-6">
+            <div
+              className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl border ring-1 ${getStatusColor(
+                project.status,
               )}`}
             >
-              {getStatusIcon(getProjectStatus(project.id))}{" "}
-              {getProjectStatus(project.id)}
-            </span>
-            <span
-              className={`px-3 py-1 text-xs rounded-full border ${getPriorityColor(
-                project.priority
-              )}`}
-            >
-              {getPriorityIcon(project.priority)} {project.priority}
-            </span>
-          </div>
-
-          {/* Progress */}
-          <div className="mb-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-600 flex items-center">
-                <BarChart3 size={14} className="mr-1" />
-                Progress
-              </span>
-              <span className="text-sm font-medium text-gray-800">
-                {getProjectProgress(project.id)}%
-              </span>
+              {getStatusIcon(project.status)}
+              <span>{project.status}</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div
+              className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl border ring-1 ${getPriorityColor(
+                project.priority,
+              )}`}
+            >
+              <Flag className="w-4 h-4" />
+              <span>{project.priority}</span>
+            </div>
+          </div>
+          {/* Progress Section */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-semibold text-slate-700">Progress</span>
+              <span className="text-lg font-bold text-slate-900">{project.progress}%</span>
+            </div>
+            <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
               <div
-                className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-500"
-                style={{ width: `${getProjectProgress(project.id)}%` }}
+                className={`bg-gradient-to-r ${getProgressColor(
+                  project.progress,
+                )} h-3 rounded-full transition-all duration-700 ease-out`}
+                style={{ width: `${project.progress}%` }}
               ></div>
             </div>
           </div>
-
-          {/* Stats */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="text-sm text-gray-600 flex items-center">
-              <Users size={14} className="mr-1" />
-              <span className="font-medium">{project.tasks.completed}</span>/
-              {project.tasks.total} tasks
+          {/* Project Stats */}
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+              <div className="flex items-center justify-center mb-2">
+                <BarChart3 className="w-5 h-5 text-blue-600 mr-2" />
+                <span className="text-sm font-semibold text-blue-700">Tasks</span>
+              </div>
+              <p className="text-2xl font-bold text-blue-900">
+                {project.tasks?.completed || 0}/{project.tasks?.total || 0}
+              </p>
             </div>
-            <div className="text-sm text-gray-600 flex items-center">
-              <Calendar size={14} className="mr-1" />
-              {project.due_date
-                ? new Date(project.due_date).toLocaleDateString()
-                : "No due date"}
+            <div className="text-center p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl border border-emerald-200">
+              <div className="flex items-center justify-center mb-2">
+                <Users className="w-5 h-5 text-emerald-600 mr-2" />
+                <span className="text-sm font-semibold text-emerald-700">Team</span>
+              </div>
+              <p className="text-2xl font-bold text-emerald-900">{project.team?.length || 0}</p>
             </div>
           </div>
-
-          {/* Team & Actions */}
-          <div className="flex items-center justify-between">
-            <div className="flex -space-x-2">
-              {project.team && project.team.length > 0 ? (
-                <>
-                  {project.team.slice(0, 3).map((member, index) => (
-                    <div
-                      key={index}
-                      className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full border-2 border-white flex items-center justify-center text-white text-xs font-medium shadow-sm"
-                      title={member.name}
-                    >
-                      {member.name
-                        ? member.name
-                            .split(" ")
-                            .map((n: string) => n[0])
-                            .join("")
-                        : "U"}
-                    </div>
-                  ))}
-                  {project.team.length > 3 && (
-                    <div className="w-8 h-8 bg-gray-400 rounded-full border-2 border-white flex items-center justify-center text-white text-xs font-medium shadow-sm">
-                      +{project.team.length - 3}
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="w-8 h-8 bg-gray-300 rounded-full border-2 border-white flex items-center justify-center text-gray-600 text-xs">
-                  <Users size={14} />
-                </div>
+          {/* Due Date */}
+          {project.due_date && (
+            <div className="flex items-center text-sm text-slate-600 mb-6 p-3 bg-slate-50 rounded-xl">
+              <Calendar className="w-5 h-5 mr-3 text-slate-500" />
+              <span className="font-medium">Due: {new Date(project.due_date).toLocaleDateString()}</span>
+            </div>
+          )}
+          {/* Team Avatars & View Link */}
+          <div className="flex items-center justify-between pt-4 border-t border-slate-200">
+            <div className="flex items-center">
+              <div className="flex -space-x-3">
+                {project.team && project.team.length > 0 ? (
+                  <>
+                    {project.team.slice(0, 4).map((member: any, index: number) => (
+                      <div
+                        key={index}
+                        className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full border-3 border-white flex items-center justify-center text-white text-sm font-bold shadow-lg"
+                        title={member.name || member.email || "Team Member"}
+                      >
+                        {member.name
+                          ? member.name.charAt(0).toUpperCase()
+                          : member.email
+                            ? member.email.charAt(0).toUpperCase()
+                            : "T"}
+                      </div>
+                    ))}
+                    {project.team.length > 4 && (
+                      <div className="w-10 h-10 bg-slate-400 rounded-full border-3 border-white flex items-center justify-center text-white text-sm font-bold shadow-lg">
+                        +{project.team.length - 4}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="w-10 h-10 bg-slate-300 rounded-full border-3 border-white flex items-center justify-center text-slate-600">
+                    <Users className="w-5 h-5" />
+                  </div>
+                )}
+              </div>
+              {project.team && project.team.length > 0 && (
+                <span className="ml-4 text-sm font-medium text-slate-600">
+                  {project.team.length} member{project.team.length !== 1 ? "s" : ""}
+                </span>
               )}
             </div>
-            <button
-              onClick={() =>
-                (window.location.href = `/dashboard/projects/${project.id}`)
-              }
-              className="text-green-600 hover:text-blue-800 text-sm font-medium hover:underline transition-colors"
+            <Link
+              href={`/dashboard/projects/${project.id}`}
+              className="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm font-semibold hover:underline transition-all duration-200 group"
             >
+              <Eye className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
               View Details
-            </button>
+            </Link>
           </div>
         </div>
       ))}
     </div>
-  );
+  )
 
-  // 📋 List view component - IMPLEMENTASI LENGKAP
   const renderListView = () => (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
       <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
+        <table className="w-full min-w-[800px]">
+          <thead className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
             <tr>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider min-w-[200px]">
                 Project
               </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider min-w-[120px]">
                 Status
               </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider min-w-[100px]">
                 Priority
               </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider min-w-[120px]">
                 Progress
               </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Due Date
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider min-w-[100px]">
                 Team
               </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider min-w-[120px]">
+                Due Date
+              </th>
+              <th className="px-4 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider min-w-[120px]">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {projects.map((project) => (
-              <tr
-                key={project.id}
-                className="hover:bg-gray-50 transition-colors"
-              >
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">
-                        {project.name}
-                      </div>
-                      <div className="text-sm text-gray-500 max-w-xs truncate">
-                        {project.description || "No description"}
-                      </div>
+          <tbody className="bg-white divide-y divide-slate-200">
+            {filteredProjects.map((project) => (
+              <tr key={project.id} className="hover:bg-slate-50 transition-colors group">
+                <td className="px-6 py-4">
+                  <div className="min-w-0">
+                    <div className="text-base font-bold text-slate-900 group-hover:text-blue-600 transition-colors truncate">
+                      {project.name}
+                    </div>
+                    <div className="text-sm text-slate-600 truncate mt-1 max-w-[180px]">
+                      {project.description || "No description"}
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`inline-flex px-3 py-1 text-xs rounded-full border ${getStatusColor(
-                      getProjectStatus(project.id)
+                <td className="px-4 py-4">
+                  <div
+                    className={`inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold rounded-lg border ${getStatusColor(
+                      project.status,
                     )}`}
                   >
-                    {getStatusIcon(getProjectStatus(project.id))}{" "}
-                    {getProjectStatus(project.id)}
-                  </span>
+                    {getStatusIcon(project.status)}
+                    <span className="hidden sm:inline">{project.status}</span>
+                  </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`inline-flex px-3 py-1 text-xs rounded-full border ${getPriorityColor(
-                      project.priority
+                <td className="px-4 py-4">
+                  <div
+                    className={`inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold rounded-lg border ${getPriorityColor(
+                      project.priority,
                     )}`}
                   >
-                    {getPriorityIcon(project.priority)} {project.priority}
-                  </span>
+                    <Flag className="w-3 h-3" />
+                    <span className="hidden sm:inline">{project.priority}</span>
+                  </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-4">
                   <div className="flex items-center">
-                    <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                    <div className="w-16 bg-slate-200 rounded-full h-2 mr-3">
                       <div
-                        className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-500"
-                        style={{ width: `${getProjectProgress(project.id)}%` }}
+                        className={`bg-gradient-to-r ${getProgressColor(
+                          project.progress,
+                        )} h-2 rounded-full transition-all duration-500`}
+                        style={{ width: `${project.progress}%` }}
                       ></div>
                     </div>
-                    <span className="text-sm text-gray-900 font-medium">
-                      {getProjectProgress(project.id)}%
-                    </span>
+                    <span className="text-sm font-bold text-slate-900 min-w-[2.5rem]">{project.progress}%</span>
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-4 py-4">
                   <div className="flex items-center">
-                    <Calendar size={14} className="mr-1 text-gray-400" />
-                    {project.due_date
-                      ? new Date(project.due_date).toLocaleDateString()
-                      : "No due date"}
+                    <div className="flex -space-x-1">
+                      {project.team && project.team.length > 0 ? (
+                        <>
+                          {project.team.slice(0, 2).map((member: any, index: number) => (
+                            <div
+                              key={index}
+                              className="w-6 h-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full border border-white flex items-center justify-center text-white text-xs font-bold shadow-sm"
+                              title={member.name || member.email || "Team Member"}
+                            >
+                              {member.name
+                                ? member.name.charAt(0).toUpperCase()
+                                : member.email
+                                  ? member.email.charAt(0).toUpperCase()
+                                  : "T"}
+                            </div>
+                          ))}
+                          {project.team.length > 2 && (
+                            <div className="w-6 h-6 bg-slate-400 rounded-full border border-white flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                              +{project.team.length - 2}
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="w-6 h-6 bg-slate-300 rounded-full border border-white flex items-center justify-center text-slate-600">
+                          <Users className="w-3 h-3" />
+                        </div>
+                      )}
+                    </div>
+                    <span className="ml-2 text-xs font-semibold text-slate-700">{project.team?.length || 0}</span>
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex -space-x-1">
-                    {project.team && project.team.length > 0 ? (
-                      <>
-                        {project.team.slice(0, 3).map((member, index) => (
-                          <div
-                            key={index}
-                            className="w-6 h-6 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full border border-white flex items-center justify-center text-white text-xs font-medium"
-                            title={member.name}
-                          >
-                            {member.name
-                              ? member.name
-                                  .split(" ")
-                                  .map((n: string) => n[0])
-                                  .join("")
-                              : "U"}
-                          </div>
-                        ))}
-                        {project.team.length > 3 && (
-                          <div className="w-6 h-6 bg-gray-400 rounded-full border border-white flex items-center justify-center text-white text-xs font-medium">
-                            +{project.team.length - 3}
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="w-6 h-6 bg-gray-300 rounded-full border border-white flex items-center justify-center text-gray-600">
-                        <Users size={12} />
-                      </div>
-                    )}
-                  </div>
+                <td className="px-4 py-4 text-sm font-medium text-slate-900">
+                  {project.due_date ? (
+                    <div className="flex items-center">
+                      <Calendar className="w-3 h-3 mr-1 text-slate-500" />
+                      <span className="text-xs">{new Date(project.due_date).toLocaleDateString()}</span>
+                    </div>
+                  ) : (
+                    <span className="text-slate-400 text-xs">No due date</span>
+                  )}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td className="px-4 py-4">
                   <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() =>
-                        (window.location.href = `/dashboard/projects/${project.id}`)
-                      }
-                      className="text-green-600 hover:text-green-800 transition-colors"
-                      title="View project"
+                    <Link
+                      href={`/dashboard/projects/${project.id}`}
+                      className="text-blue-600 hover:text-blue-800 transition-colors p-1 hover:bg-blue-50 rounded"
+                      title="View project details"
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                        <circle cx="12" cy="12" r="3" />
-                      </svg>
+                      <Eye className="w-4 h-4" />
+                    </Link>
+                    <button
+                      onClick={() => handleEditProject(project)}
+                      className="text-slate-600 hover:text-blue-600 transition-colors p-1 hover:bg-blue-50 rounded"
+                      title="Edit project"
+                    >
+                      <Edit className="w-4 h-4" />
                     </button>
-                    {hasPermission("manage_projects") && (
-                      <>
-                        <button
-                          onClick={() => {
-                            setEditingProject(project);
-                            setIsEditProjectModalOpen(true);
-                          }}
-                          className="text-green-600 hover:text-blue-800 transition-colors"
-                          title="Edit project"
-                        >
-                          <Edit size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteProject(project.id)}
-                          className="text-red-600 hover:text-red-800 transition-colors"
-                          title="Delete project"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </>
-                    )}
+                    <button
+                      onClick={() => handleDeleteProject(project)}
+                      className="text-slate-600 hover:text-red-600 transition-colors p-1 hover:bg-red-50 rounded"
+                      title="Delete project"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -672,346 +582,269 @@ export default function ProjectsPage() {
         </table>
       </div>
     </div>
-  );
+  )
 
   return (
-    <div>
+    <div className="max-w-7xl mx-auto space-y-10 p-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
-          <p className="text-gray-600 mt-1">
-            Manage and track your project progress
-          </p>
-          {/* 🔍 Debug info - bisa dihapus di production */}
-          <p className="text-xs text-gray-400 mt-1">
-            Connected to API • {projects.length} projects loaded
-          </p>
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <div className="space-y-4">
+          <div>
+            <h1 className="text-4xl font-bold text-slate-900 mb-2">Projects</h1>
+            <p className="text-lg text-slate-600">Manage and track your project progress with ease</p>
+          </div>
+          <div className="flex items-center gap-6 text-sm">
+            <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-xl border border-blue-200">
+              <BarChart3 className="w-4 h-4 text-blue-600" />
+              <span className="font-semibold text-blue-700">{projects.length} Projects</span>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 rounded-xl border border-emerald-200">
+              <Users className="w-4 h-4 text-emerald-600" />
+              <span className="font-semibold text-emerald-700">{users.length} Team Members</span>
+            </div>
+          </div>
         </div>
-        {hasPermission("manage_projects") ? (
-          <button
-            onClick={() => setIsNewProjectModalOpen(true)}
-            className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+        <button
+          onClick={() => setIsNewProjectModalOpen(true)}
+          className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-2xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 font-semibold text-lg"
+        >
+          <Plus className="w-6 h-6" />
+          <span>New Project</span>
+        </button>
+      </div>
+      {/* Stats Cards */}
+      {stats && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-2xl border border-blue-200 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold text-blue-600 mb-2">Total Projects</p>
+                <p className="text-4xl font-bold text-blue-900">{stats.total}</p>
+              </div>
+              <div className="w-16 h-16 bg-blue-200 rounded-2xl flex items-center justify-center">
+                <BarChart3 className="w-8 h-8 text-blue-700" />
+              </div>
+            </div>
+          </div>
+          <div className="bg-gradient-to-br from-amber-50 to-amber-100 p-8 rounded-2xl border border-amber-200 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold text-amber-600 mb-2">In Progress</p>
+                <p className="text-4xl font-bold text-amber-900">{stats.in_progress}</p>
+              </div>
+              <div className="w-16 h-16 bg-amber-200 rounded-2xl flex items-center justify-center">
+                <Activity className="w-8 h-8 text-amber-700" />
+              </div>
+            </div>
+          </div>
+          <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-8 rounded-2xl border border-emerald-200 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold text-emerald-600 mb-2">Completed</p>
+                <p className="text-4xl font-bold text-emerald-900">{stats.completed}</p>
+              </div>
+              <div className="w-16 h-16 bg-emerald-200 rounded-2xl flex items-center justify-center">
+                <CheckCircle className="w-8 h-8 text-emerald-700" />
+              </div>
+            </div>
+          </div>
+          <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-8 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold text-slate-600 mb-2">On Hold</p>
+                <p className="text-4xl font-bold text-slate-900">{stats.on_hold}</p>
+              </div>
+              <div className="w-16 h-16 bg-slate-200 rounded-2xl flex items-center justify-center">
+                <Pause className="w-8 h-8 text-slate-700" />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Filters and Controls */}
+      <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="flex flex-col xl:flex-row gap-6 items-start xl:items-center justify-between">
+          {/* Search and Filters */}
+          <div className="flex flex-col lg:flex-row gap-4 flex-1">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Search projects by name or description..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-12 pr-4 py-4 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full text-slate-900 placeholder-slate-500 font-medium"
+              />
+            </div>
+            <div className="flex gap-4">
+              <div className="relative">
+                <Filter className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="pl-12 pr-10 py-4 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-900 appearance-none cursor-pointer font-medium min-w-[140px]"
+                >
+                  <option value="all">All Status</option>
+                  <option value="Planning">Planning</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Completed">Completed</option>
+                  <option value="On Hold">On Hold</option>
+                </select>
+              </div>
+              <div className="relative">
+                <SortAsc className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                <select
+                  value={priorityFilter}
+                  onChange={(e) => setPriorityFilter(e.target.value)}
+                  className="pl-12 pr-10 py-4 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-900 appearance-none cursor-pointer font-medium min-w-[150px]"
+                >
+                  <option value="all">All Priority</option>
+                  <option value="High">High Priority</option>
+                  <option value="Medium">Medium Priority</option>
+                  <option value="Low">Low Priority</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          {/* View Toggle */}
+          <div className="flex items-center space-x-2 bg-slate-100 rounded-xl p-2">
+            <button
+              onClick={() => setViewMode("grid")}
+              className={`flex items-center gap-3 px-6 py-3 rounded-lg transition-all font-semibold ${
+                viewMode === "grid"
+                  ? "bg-white text-blue-600 shadow-md ring-1 ring-blue-200"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+              title="Grid View"
             >
-              <path d="M5 12h14" />
-              <path d="M12 5v14" />
-            </svg>
-            <span className="font-medium">New Project</span>
-          </button>
-        ) : (
-          <div className="text-center">
-            <p className="text-sm text-gray-500">
-              You don't have permission to create projects
-            </p>
-            <p className="text-xs text-gray-400">
-              Contact your administrator for access
-            </p>
+              <Grid3X3 className="w-5 h-5" />
+              <span>Grid</span>
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              className={`flex items-center gap-3 px-6 py-3 rounded-lg transition-all font-semibold ${
+                viewMode === "list"
+                  ? "bg-white text-blue-600 shadow-md ring-1 ring-blue-200"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+              title="List View"
+            >
+              <List className="w-5 h-5" />
+              <span>List</span>
+            </button>
+          </div>
+        </div>
+        {/* Active Filters Display */}
+        {(searchTerm || statusFilter !== "all" || priorityFilter !== "all") && (
+          <div className="flex items-center gap-3 mt-6 pt-6 border-t border-slate-200">
+            <span className="text-sm font-semibold text-slate-600">Active filters:</span>
+            {searchTerm && (
+              <span className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-800 text-black rounded-xl font-medium">
+                Search: "{searchTerm}"
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="hover:text-blue-900 p-1 hover:bg-blue-200 rounded-full transition-colors"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            )}
+            {statusFilter !== "all" && (
+              <span className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 text-emerald-800 text-sm rounded-xl font-medium">
+                Status: {statusFilter}
+                <button
+                  onClick={() => setStatusFilter("all")}
+                  className="hover:text-emerald-900 p-1 hover:bg-emerald-200 rounded-full transition-colors"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            )}
+            {priorityFilter !== "all" && (
+              <span className="inline-flex items-center gap-2 px-4 py-2 bg-amber-100 text-amber-800 text-sm rounded-xl font-medium">
+                Priority: {priorityFilter}
+                <button
+                  onClick={() => setPriorityFilter("all")}
+                  className="hover:text-amber-900 p-1 hover:bg-amber-200 rounded-full transition-colors"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            )}
           </div>
         )}
       </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">Total Projects</p>
-              <p className="text-3xl font-bold text-gray-900">
-                {stats?.total || 0}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-green-600"
-              >
-                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">In Progress</p>
-              <p className="text-3xl font-bold text-gray-900">
-                {stats?.in_progress || 0}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-yellow-600"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="12,6 12,12 16,14" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">Completed</p>
-              <p className="text-3xl font-bold text-gray-900">
-                {stats?.completed || 0}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-green-600"
-              >
-                <path d="M9 12l2 2 4-4" />
-                <circle cx="12" cy="12" r="10" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">On Hold</p>
-              <p className="text-3xl font-bold text-gray-900">
-                {stats?.on_hold || 0}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-gray-600"
-              >
-                <rect x="6" y="4" width="4" height="16" />
-                <rect x="14" y="4" width="4" height="16" />
-              </svg>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Filters and View Toggle */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-4">
-          <select
-            value={statusFilter}
-            onChange={(e) => handleFilterChange("status", e.target.value)}
-            className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white text-gray-900 shadow-sm"
-          >
-            <option value="all">All Status</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Completed">Completed</option>
-            <option value="Planning">Planning</option>
-            <option value="On Hold">On Hold</option>
-          </select>
-
-          <select
-            value={priorityFilter}
-            onChange={(e) => handleFilterChange("priority", e.target.value)}
-            className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white text-gray-900 shadow-sm"
-          >
-            <option value="all">All Priority</option>
-            <option value="High">High</option>
-            <option value="Medium">Medium</option>
-            <option value="Low">Low</option>
-          </select>
-        </div>
-
-        <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
-          <button
-            onClick={() => setViewMode("grid")}
-            className={`p-2 rounded-md transition-all ${
-              viewMode === "grid"
-                ? "bg-white text-green-600 shadow-sm"
-                : "text-gray-400 hover:text-gray-600"
-            }`}
-            title="Grid View"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <rect width="7" height="7" x="3" y="3" rx="1" />
-              <rect width="7" height="7" x="14" y="3" rx="1" />
-              <rect width="7" height="7" x="14" y="14" rx="1" />
-              <rect width="7" height="7" x="3" y="14" rx="1" />
-            </svg>
-          </button>
-          <button
-            onClick={() => setViewMode("list")}
-            className={`p-2 rounded-md transition-all ${
-              viewMode === "list"
-                ? "bg-white text-green-600 shadow-sm"
-                : "text-gray-400 hover:text-gray-600"
-            }`}
-            title="List View"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="8" x2="21" y1="6" y2="6" />
-              <line x1="8" x2="21" y1="12" y2="12" />
-              <line x1="8" x2="21" y1="18" y2="18" />
-              <line x1="3" x2="3.01" y1="6" y2="6" />
-              <line x1="3" x2="3.01" y1="12" y2="12" />
-              <line x1="3" x2="3.01" y1="18" y2="18" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
       {/* Projects Display */}
-      {projects.length === 0 ? (
-        <div className="text-center py-16">
-          <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="32"
-              height="32"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="text-gray-400"
-            >
-              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-            </svg>
+      <div className="w-full">
+        {filteredProjects.length === 0 ? (
+          <div className="text-center py-20">
+            <div className="w-32 h-32 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center mx-auto mb-8">
+              <BarChart3 className="w-16 h-16 text-slate-400" />
+            </div>
+            <h3 className="text-2xl font-bold text-slate-900 mb-4">
+              {projects.length === 0 ? "No projects yet" : "No projects match your filters"}
+            </h3>
+            <p className="text-slate-600 mb-10 max-w-md mx-auto text-lg leading-relaxed">
+              {projects.length === 0
+                ? "Get started by creating your first project to organize your work and collaborate with your team."
+                : "Try adjusting your search terms or filters to find the projects you're looking for."}
+            </p>
+            {projects.length === 0 ? (
+              <button
+                onClick={() => setIsNewProjectModalOpen(true)}
+                className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-10 py-5 rounded-2xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 font-semibold text-lg"
+              >
+                <Plus className="w-6 h-6" />
+                <span>Create Your First Project</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  setSearchTerm("")
+                  setStatusFilter("all")
+                  setPriorityFilter("all")
+                }}
+                className="inline-flex items-center gap-3 bg-slate-600 text-white px-8 py-4 rounded-xl hover:bg-slate-700 transition-colors font-semibold"
+              >
+                Clear All Filters
+              </button>
+            )}
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            No projects found
-          </h3>
-          <p className="text-gray-500 mb-6">
-            Get started by creating your first project
-          </p>
-          {hasPermission("manage_projects") ? (
-            <button
-              onClick={() => setIsNewProjectModalOpen(true)}
-              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-            >
-              Create Your First Project
-            </button>
-          ) : (
-            <div className="text-center">
-              <p className="text-sm text-gray-500 mb-2">
-                You don't have permission to create projects
-              </p>
-              <p className="text-xs text-gray-400">
-                Contact your administrator for access
+        ) : (
+          <>
+            {/* Results Summary */}
+            <div className="flex items-center justify-between mb-8">
+              <p className="text-slate-600 font-medium">
+                Showing <span className="font-bold text-slate-900">{filteredProjects.length}</span> of{" "}
+                <span className="font-bold text-slate-900">{projects.length}</span> projects
               </p>
             </div>
-          )}
-        </div>
-      ) : viewMode === "grid" ? (
-        renderGridView()
-      ) : (
-        renderListView()
-      )}
-
-      {/* New Project Modal */}
-      {hasPermission("manage_projects") && (
-        <NewProjectModal
-          isOpen={isNewProjectModalOpen}
-          onClose={() => setIsNewProjectModalOpen(false)}
-          onSubmit={handleCreateProject}
+            {/* Projects Grid/List */}
+            {viewMode === "grid" ? renderGridView() : renderListView()}
+          </>
+        )}
+      </div>
+      {/* Modals */}
+      <NewProjectModal
+        isOpen={isNewProjectModalOpen}
+        onClose={() => setIsNewProjectModalOpen(false)}
+        onSubmit={async (data) => {
+          await createProject(data)
+          await refetch()
+        }}
+      />
+      {isEditProjectModalOpen && selectedProject && (
+        <EditProjectModal
+          isOpen={isEditProjectModalOpen}
+          onClose={() => {
+            setIsEditProjectModalOpen(false)
+            setSelectedProject(null)
+          }}
+          project={selectedProject}
+          onUpdate={handleUpdateProject}
+          users={users}
         />
       )}
-      {hasPermission("manage_projects") &&
-        isEditProjectModalOpen &&
-        editingProject && (
-          <NewProjectModal
-            isOpen={isEditProjectModalOpen}
-            onClose={() => setIsEditProjectModalOpen(false)}
-            initialData={{
-              name: editingProject.name,
-              description: editingProject.description || "",
-              status: editingProject.status,
-              priority: editingProject.priority,
-              due_date: editingProject.due_date || "",
-              progress: editingProject.progress,
-            }}
-            onSubmit={async (data) => {
-              await updateProject(editingProject.id, {
-                name: data.name,
-                description: data.description || "",
-                status: data.status as
-                  | "Planning"
-                  | "In Progress"
-                  | "Completed"
-                  | "On Hold",
-                priority: data.priority as "Low" | "Medium" | "High",
-                due_date: data.due_date || undefined,
-                progress: data.progress || 0,
-              });
-              setIsEditProjectModalOpen(false);
-              setEditingProject(null);
-              refetch();
-            }}
-          />
-        )}
     </div>
-  );
+  )
 }
