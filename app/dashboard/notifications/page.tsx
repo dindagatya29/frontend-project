@@ -121,7 +121,7 @@ export default function NotificationsPage() {
   // Tambahkan instance Audio di luar fungsi komponen atau di dalam useEffect dengan cleanup
   // agar tidak membuat instance baru setiap render.
   // Untuk kesederhanaan, kita bisa membuatnya di dalam komponen dan memastikannya hanya dibuat sekali.
-  const notificationSound = typeof Audio !== "undefined" ? new Audio("/sounds/deadline.mp3") : null
+  const notificationSound = typeof Audio !== "undefined" ? new Audio("/sounds/pesanterkirim.mp3") : null
 
   // Data from hooks
   const { projects } = useProjects()
