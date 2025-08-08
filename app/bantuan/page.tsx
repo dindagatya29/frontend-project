@@ -16,6 +16,7 @@ import {
   Phone,
   ArrowRight,
 } from "lucide-react"
+import Footer from "@/components/footer"
 
 export default function BantuanPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -249,6 +250,9 @@ export default function BantuanPage() {
 
       {/* Support Modal */}
       <SupportModal isOpen={isModalOpen} onClose={closeModal} />
+
+       {/* Add the Footer component here */}
+            <Footer />
     </div>
   )
 }

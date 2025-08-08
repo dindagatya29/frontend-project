@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { Mail, Phone, MessageCircle, Send, User, AtSign } from "lucide-react"
+import Footer from "@/components/footer"
 
 export default function DukunganPage() {
   return (
@@ -197,6 +198,9 @@ export default function DukunganPage() {
           </div>
         </div>
       </main>
+ {/* Add the Footer component here */}
+      <Footer />
+
     </div>
   )
 }

@@ -5,16 +5,20 @@ import { useState, useEffect, useCallback } from "react"
 const API_BASE_URL = "https://nexapro.web.id/api"
 
 interface Task {
-  action: any
-  id: number
-  title: string
-  description?: string
-  project: string
-  project_id: number
-  assignee: string
-  assignee_id?: number
-  status: "Todo" | "In Progress" | "Completed"
-  priority: "Low" | "Medium" | "High"
+  project_name: string // This is the correct property
+  action: any
+  id: number
+  title: string
+  description?: string
+  project: string
+  project_id: number
+  assignee: string
+  assignee_id?: number
+  status: "Todo" | "In Progress" | "Completed"
+  priority: "Low" | "Medium" | "High"
+  todo_list?: { text: string; checked: boolean }[] // ✅ Tambahkan ini
+
+
   
   dueDate?: string
   due_date?: string

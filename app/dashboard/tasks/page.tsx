@@ -390,7 +390,7 @@ export default function TasksPage() {
                             </span>
                             {task.project && (
                               <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                                {projects.find((p) => p.id === task.project_id)?.name || "Unknown Project"}
+                                {projects.find((p) => p.id === task.project_id)?.name || task.project}
                               </span>
                             )}
                           </div>

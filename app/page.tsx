@@ -4,18 +4,8 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import SolusiDropdown from "@/components/solusi-dropdown";
-import {
-  ArrowRight,
-  CheckCircle,
-  Users,
-  Zap,
-  Shield,
-  Menu,
-  X,
-  BarChart2,
-  Clock,
-  ClipboardList,
-} from "lucide-react";
+import Footer from "@/components/footer"; // Import the new Footer component
+import { ArrowRight, CheckCircle, Users, Zap, Shield, Menu, X, BarChart2, Clock, ClipboardList } from 'lucide-react';
 
 export default function Home() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -48,7 +38,6 @@ export default function Home() {
               </span>
             </Link>
           </div>
-
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-8">
             <SolusiDropdown />
@@ -65,7 +54,6 @@ export default function Home() {
               Tentang
             </Link>
           </div>
-
           {/* Desktop Auth Buttons */}
           <div className="hidden sm:flex items-center space-x-3 sm:space-x-4">
             <Link
@@ -81,7 +69,6 @@ export default function Home() {
               Daftar
             </Link>
           </div>
-
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -94,7 +81,6 @@ export default function Home() {
             )}
           </button>
         </nav>
-
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="sm:hidden mt-4 backdrop-blur-sm bg-white/10 rounded-2xl border border-white/10 p-4">
@@ -137,7 +123,6 @@ export default function Home() {
         )}
       </header>
       <br></br>
-
       {/* Hero Section - Lower z-index so dropdown appears above */}
       <main className="relative z-10 container mx-auto px-4 pt-12 sm:pt-20 pb-12 sm:pb-20">
         <div className="max-w-7xl mx-auto">
@@ -148,7 +133,6 @@ export default function Home() {
                 Platform Manajemen Proyek Perusahaan
               </span>
             </div>
-
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6">
               <span className="bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">
                 Kelola Proyek
@@ -158,13 +142,11 @@ export default function Home() {
                 Dengan Efisien
               </span>
             </h1>
-
             <p className="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed mb-10">
               NexaPro adalah platform manajemen proyek internal yang membantu
               tim perusahaan mengelola tugas, memantau progres, dan
               berkolaborasi dengan efisiensi maksimal.
             </p>
-
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mb-10">
               <Link
                 href="/dashboard"
@@ -174,7 +156,6 @@ export default function Home() {
                 <ArrowRight className="h-5 w-5" />
               </Link>
             </div>
-
             <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-8 text-sm text-gray-400">
               <div className="flex items-center space-x-2">
                 <CheckCircle className="h-4 w-4 text-[#00d2c6]" />
@@ -190,10 +171,9 @@ export default function Home() {
               </div>
             </div>
           </div>
-
           {/* Hero Image */}
           <div className="relative px-4 sm:px-0">
-            <div className="absolute inset-0  from-[#0f172a] via-transparent to-transparent z-10"></div>
+            <div className="absolute inset-0 from-[#0f172a] via-transparent to-transparent z-10"></div>
             <div className="relative mx-auto max-w-3xl">
               {" "}
               {/* Lebarkan ukuran gambar */}
@@ -227,7 +207,6 @@ export default function Home() {
               fitur-fitur canggih
             </p>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {/* Kolaborasi Tim */}
             <div className="group p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/0 backdrop-blur-sm border border-white/10 hover:border-[#00d2c6]/50 transition-all duration-300">
@@ -242,7 +221,6 @@ export default function Home() {
                 terintegrasi, dan file sharing yang aman.
               </p>
             </div>
-
             {/* Manajemen Proyek */}
             <div className="group p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/0 backdrop-blur-sm border border-white/10 hover:border-[#00d2c6]/50 transition-all duration-300">
               <div className="h-10 w-10 sm:h-12 sm:w-12 bg-gradient-to-r from-[#00d2c6] to-[#00b5ab] rounded-xl flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300">
@@ -256,7 +234,6 @@ export default function Home() {
                 pelacakan progres dan penjadwalan dinamis.
               </p>
             </div>
-
             {/* Pelacakan Waktu */}
             <div className="group p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/0 backdrop-blur-sm border border-white/10 hover:border-[#00d2c6]/50 transition-all duration-300">
               <div className="h-10 w-10 sm:h-12 sm:w-12 bg-gradient-to-r from-[#00d2c6] to-[#00b5ab] rounded-xl flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300">
@@ -283,12 +260,10 @@ export default function Home() {
                 Siap Meningkatkan Produktivitas Tim?
               </span>
             </h2>
-
             <p className="text-lg sm:text-xl text-gray-300 mb-6 sm:mb-8 max-w-2xl mx-auto">
               Bergabung dengan tim perusahaan yang sudah merasakan efisiensi
               maksimal dengan NexaPro
             </p>
-
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/dashboard"
@@ -307,6 +282,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Add the Footer component here */}
+      <Footer />
     </div>
   );
 }

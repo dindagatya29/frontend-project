@@ -501,7 +501,7 @@ export default function TeamPage() {
 
     try {
       const response = await fetch(
-        `hhttps://nexapro.web.id/api/team/${memberId}`,
+        `https://nexapro.web.id/api/team/${memberId}`,
         {
           method: "DELETE",
         }

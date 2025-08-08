@@ -13,6 +13,7 @@ import {
   CheckCircle,
   Building2,
 } from "lucide-react"
+import Footer from "@/components/footer"
 
 export default function AboutPage() {
   return (
@@ -338,6 +339,9 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+ {/* Add the Footer component here */}
+      <Footer />
+
     </div>
   )
 }

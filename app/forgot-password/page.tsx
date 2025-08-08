@@ -1,44 +1,43 @@
-"use client";
+"use client"
 
-import { useState, useRef, useEffect } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Mail, Lock } from 'lucide-react'; // Import Lucide React icons
+import { useState } from "react"
+import Link from "next/link"
+import { Mail } from 'lucide-react' // Import Mail icon
 
-export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+export default function ForgotPasswordPage() {
+  const [email, setEmail] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    setMessage(null)
+    setError(null)
+
     try {
-      const res = await fetch("https://nexapro.web.id/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || `HTTP ${res.status}`);
-      }
-      // Simpan token ke localStorage
-      localStorage.setItem("nexapro_token", data.token);
-      localStorage.setItem("nexapro_user", JSON.stringify(data.user));
-      router.push("/dashboard");
+      // Simulate API call for password reset request
+      await new Promise(resolve => setTimeout(resolve, 2000))
+
+      // In a real application, you would send a request to your backend
+      // const res = await fetch("/api/forgot-password", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({ email }),
+      // });
+      // const data = await res.json();
+      // if (!res.ok) {
+      //   throw new Error(data.message || `HTTP ${res.status}`);
+      // }
+
+      setMessage("Link reset password telah dikirim ke email Anda. Silakan cek kotak masuk Anda.")
     } catch (err: any) {
-      setError(err.message || "Login gagal");
+      setError(err.message || "Gagal mengirim link reset password. Silakan coba lagi.")
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center px-4 relative overflow-hidden">
@@ -56,10 +55,10 @@ export default function LoginPage() {
           </span>
         </Link>
         <div className="flex items-center space-x-3">
-          <span className="text-white">Belum punya akun?</span>
-          <Link href="/register">
+          <span className="text-white">Ingat akun Anda?</span>
+          <Link href="/login">
             <button className="bg-[#00d2c6] hover:bg-[#00b5ab] text-white rounded-lg px-6 py-2 transition-colors">
-              Daftar
+              Masuk
             </button>
           </Link>
         </div>
@@ -67,15 +66,13 @@ export default function LoginPage() {
       <main className="w-full max-w-md z-10">
         <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border border-white/20">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">
-              Selamat Datang
-            </h1>
-            <p className="text-gray-600">Masuk ke akun NexaPro Anda</p>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">Lupa Kata Sandi?</h1>
+            <p className="text-gray-600">Masukkan email Anda untuk mereset kata sandi.</p>
           </div>
-          <form onSubmit={handleLogin} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email atau Akun
+                Email
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -90,45 +87,14 @@ export default function LoginPage() {
                 />
               </div>
             </div>
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Kata Sandi
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="password"
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00d2c6] focus:border-transparent transition-all duration-200 bg-white/50"
-                  placeholder="Masukkan kata sandi"
-                  required
-                />
+            {message && (
+              <div className="bg-green-100 border border-green-200 text-green-800 px-4 py-3 rounded relative" role="alert">
+                <strong className="font-bold">Berhasil!</strong>
+                <span className="block sm:inline"> {message}</span>
               </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 text-[#00d2c6] bg-gray-100 border-gray-300 rounded focus:ring-[#00d2c6] focus:ring-2"
-                />
-                <span className="ml-2 text-sm text-gray-600">Ingat saya</span>
-              </label>
-              <Link
-                href="/forgot-password" // Diperbaiki: Mengarahkan ke halaman forgot-password
-                className="text-sm text-[#00d2c6] hover:text-[#00b5ab] transition-colors"
-              >
-                Lupa password?
-              </Link>
-            </div>
+            )}
             {error && (
-              <div
-                className="bg-red-100 border border-red-200 text-red-800 px-4 py-3 rounded relative"
-                role="alert"
-              >
+              <div className="bg-red-100 border border-red-200 text-red-800 px-4 py-3 rounded relative" role="alert">
                 <strong className="font-bold">Error!</strong>
                 <span className="block sm:inline"> {error}</span>
               </div>
@@ -163,16 +129,14 @@ export default function LoginPage() {
                   Memproses...
                 </div>
               ) : (
-                "Masuk"
+                "Kirim Link Reset"
               )}
             </button>
           </form>
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-            </div>
+          <div className="mt-6 text-center">
+            <Link href="/login" className="text-sm text-[#00d2c6] hover:text-[#00b5ab] transition-colors">
+              Kembali ke Halaman Login
+            </Link>
           </div>
         </div>
         {/* Background decoration */}
@@ -206,5 +170,5 @@ export default function LoginPage() {
         }
       `}</style>
     </div>
-  );
+  )
 }
