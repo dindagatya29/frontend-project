@@ -2,9 +2,23 @@
 
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
-import { ChevronDown, LayoutDashboard, Users, BarChart2, WifiOff, GitPullRequest, Globe, MessageSquare, Lock } from 'lucide-react'
+import {
+  ChevronDown,
+  LayoutDashboard,
+  Users,
+  BarChart2,
+  WifiOff,
+  GitPullRequest,
+  Globe,
+  MessageSquare,
+  Lock,
+} from "lucide-react"
 
-export default function SolusiDropdown() {
+interface SolusiDropdownProps {
+  onOpenChange?: (isOpen: boolean) => void
+}
+
+export default function SolusiDropdown({ onOpenChange }: SolusiDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -21,6 +35,10 @@ export default function SolusiDropdown() {
     }
   }, [])
 
+  useEffect(() => {
+    onOpenChange?.(isOpen)
+  }, [isOpen, onOpenChange])
+
   const handleItemClick = () => {
     setIsOpen(false)
   }
@@ -33,14 +51,14 @@ export default function SolusiDropdown() {
         className="flex items-center space-x-1 text-gray-300 hover:text-[#00d2c6] transition-colors duration-200 py-2 lg:py-0"
       >
         <span>Solusi</span>
-        <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
       </button>
       {isOpen && (
         <div
           onMouseLeave={() => setIsOpen(false)} // Close on mouse leave for desktop
           className="absolute left-0 lg:left-1/2 lg:transform lg:-translate-x-1/2 mt-2 w-full lg:w-[650px] bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/20 z-50 overflow-hidden"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 md:p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 md:p-6 max-h-[70vh] md:max-h-none overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
             {/* Left Column */}
             <div className="space-y-4 md:space-y-6">
               {/* Project Management */}
@@ -50,7 +68,9 @@ export default function SolusiDropdown() {
                     <div className="w-9 h-9 md:w-10 md:h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
                       <LayoutDashboard className="text-white w-5 h-5 md:w-6 md:h-6" />
                     </div>
-                    <h3 className="font-semibold text-base md:text-lg text-gray-800 group-hover:text-blue-700">Manajemen Proyek</h3>
+                    <h3 className="font-semibold text-base md:text-lg text-gray-800 group-hover:text-blue-700">
+                      Manajemen Proyek
+                    </h3>
                   </div>
                   <p className="text-gray-600 text-xs md:text-sm leading-relaxed pl-12">
                     Kelola proyek dengan timeline yang jelas, milestone tracking, dan resource allocation yang optimal.
@@ -64,10 +84,13 @@ export default function SolusiDropdown() {
                     <div className="w-9 h-9 md:w-10 md:h-10 bg-teal-500 rounded-lg flex items-center justify-center flex-shrink-0">
                       <Users className="text-white w-5 h-5 md:w-6 md:h-6" />
                     </div>
-                    <h3 className="font-semibold text-base md:text-lg text-gray-800 group-hover:text-green-700">Kolaborasi Tim</h3>
+                    <h3 className="font-semibold text-base md:text-lg text-gray-800 group-hover:text-green-700">
+                      Kolaborasi Tim
+                    </h3>
                   </div>
                   <p className="text-gray-600 text-xs md:text-sm leading-relaxed pl-12">
-                    Real-time collaboration dengan chat terintegrasi, file sharing, dan video conference untuk tim remote.
+                    Real-time collaboration dengan chat terintegrasi, file sharing, dan video conference untuk tim
+                    remote.
                   </p>
                 </div>
               </Link>
@@ -83,7 +106,8 @@ export default function SolusiDropdown() {
                     </h3>
                   </div>
                   <p className="text-gray-600 text-xs md:text-sm leading-relaxed pl-12">
-                    Dashboard analytics dengan visualisasi data yang interaktif untuk monitoring performa tim dan proyek.
+                    Dashboard analytics dengan visualisasi data yang interaktif untuk monitoring performa tim dan
+                    proyek.
                   </p>
                 </div>
               </Link>
@@ -94,7 +118,9 @@ export default function SolusiDropdown() {
                     <div className="w-9 h-9 md:w-10 md:h-10 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg flex items-center justify-center flex-shrink-0">
                       <WifiOff className="text-white w-5 h-5 md:w-6 md:h-6" />
                     </div>
-                    <h3 className="font-semibold text-base md:text-lg text-gray-800 group-hover:text-orange-700">Mode Offline</h3>
+                    <h3 className="font-semibold text-base md:text-lg text-gray-800 group-hover:text-orange-700">
+                      Mode Offline
+                    </h3>
                   </div>
                   <p className="text-gray-600 text-xs md:text-sm leading-relaxed pl-12">
                     Bekerja tanpa koneksi internet dengan sinkronisasi otomatis saat online kembali.
@@ -127,7 +153,9 @@ export default function SolusiDropdown() {
                     <div className="w-9 h-9 md:w-10 md:h-10 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
                       <Globe className="text-white w-5 h-5 md:w-6 md:h-6" />
                     </div>
-                    <h3 className="font-semibold text-base md:text-lg text-gray-800 group-hover:text-indigo-700">Kerja Remote</h3>
+                    <h3 className="font-semibold text-base md:text-lg text-gray-800 group-hover:text-indigo-700">
+                      Kerja Remote
+                    </h3>
                   </div>
                   <p className="text-gray-600 text-xs md:text-sm leading-relaxed pl-12">
                     Tools lengkap untuk remote work dengan time tracking, virtual office, dan productivity monitoring.
@@ -146,7 +174,8 @@ export default function SolusiDropdown() {
                     </h3>
                   </div>
                   <p className="text-gray-600 text-xs md:text-sm leading-relaxed pl-12">
-                    Integrasi WhatsApp untuk notifikasi real-time, update status proyek, dan komunikasi tim yang efektif.
+                    Integrasi WhatsApp untuk notifikasi real-time, update status proyek, dan komunikasi tim yang
+                    efektif.
                   </p>
                 </div>
               </Link>
