@@ -1,11 +1,29 @@
 "use client"
-
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useProjects } from "@/hooks/use-projects"
 import { useTasks } from "@/hooks/use-tasks"
-import { Plus, Search, Edit, Trash2, Calendar, Users, BarChart3, CheckCircle, AlertCircle, Pause, Grid3X3, List, Eye, X, Flag, Filter, SortAsc, Target, Activity } from 'lucide-react'
+import {
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  Calendar,
+  BarChart3,
+  CheckCircle,
+  AlertCircle,
+  Pause,
+  Grid3X3,
+  List,
+  Eye,
+  X,
+  Flag,
+  Filter,
+  SortAsc,
+  Target,
+  Activity,
+} from "lucide-react"
 import EditProjectModal from "@/components/edit-project-modal"
 import NewProjectModal from "@/components/new-project-modal"
 
@@ -25,8 +43,101 @@ interface NewProjectFormType {
 }
 
 export default function ProjectsPage() {
+  const [currentUser, setCurrentUser] = useState<any>(null)
+  const [userPermissions, setUserPermissions] = useState<string[]>([])
+
   const { projects, loading, error, stats, refetch, createProject, updateProject, deleteProject } = useProjects()
   const { users } = useTasks()
+
+  const hasPermission = (permission: string): boolean => {
+    if (!currentUser) return false
+    if (currentUser.role === "admin") return true // Admin has all permissions
+    return userPermissions.includes(permission)
+  }
+
+  const canCreateProject = hasPermission("manage_projects")
+
+  useEffect(() => {
+    const userStr = localStorage.getItem("nexapro_user")
+    if (userStr) {
+      const user = JSON.parse(userStr)
+      setCurrentUser(user)
+
+      fetch(`https://nexapro.web.id/api/admin/user-permissions/${user.id}`)
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("🔍 User permissions API response:", data) // Debug log
+          if (data.success && data.data) {
+            setUserPermissions(data.data.map((p: any) => p.name))
+            console.log(
+              "✅ User permissions loaded:",
+              data.data.map((p: any) => p.name),
+            ) // Debug log
+          }
+        })
+        .catch((error) => {
+          console.error("❌ Failed to fetch user permissions from API:", error)
+          const rolePermissions = {
+            admin: [
+              "manage_users",
+              "manage_projects",
+              "manage_tasks",
+              "view_reports",
+              "export_data",
+              "manage_settings",
+              "manage_integrations",
+              "manage_roles",
+              "track_time",
+              "view_projects",
+              "manage_team",
+            ],
+            project_manager: [
+              "manage_projects",
+              "manage_tasks",
+              "assign_tasks",
+              "view_reports",
+              "export_data",
+              "manage_team",
+              "view_time_tracking",
+              "track_time",
+              "view_projects",
+            ],
+            member: [
+              "view_projects",
+              "manage_own_tasks",
+              "comment_tasks",
+              "upload_files",
+              "track_time",
+              "view_own_reports",
+            ],
+          }
+          const fallbackPermissions = rolePermissions[user.role as keyof typeof rolePermissions] || []
+          setUserPermissions(fallbackPermissions)
+          console.log("🔄 Using fallback permissions for role", user.role, ":", fallbackPermissions) // Debug log
+        })
+    }
+  }, [])
+
+  useEffect(() => {
+    const handleProjectUpdated = (event: CustomEvent) => {
+      console.log("🔄 Real-time project update received in Projects page:", event.detail)
+      refetch()
+    }
+
+    const handleTaskUpdated = (event: CustomEvent) => {
+      console.log("🔄 Real-time task update received in Projects page:", event.detail)
+      refetch()
+    }
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("projectUpdated", handleProjectUpdated as EventListener)
+      window.addEventListener("taskUpdated", handleTaskUpdated as EventListener)
+      return () => {
+        window.removeEventListener("projectUpdated", handleProjectUpdated as EventListener)
+        window.removeEventListener("taskUpdated", handleTaskUpdated as EventListener)
+      }
+    }
+  }, [refetch])
 
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [searchTerm, setSearchTerm] = useState("")
@@ -51,18 +162,55 @@ export default function ProjectsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMsg, setErrorMsg] = useState("")
 
+  const handleCreateProject = async (projectData: any) => {
+    if (!hasPermission("manage_projects")) {
+      alert("You don't have permission to create projects")
+      return
+    }
+
+    try {
+      await createProject(projectData)
+      setIsNewProjectModalOpen(false)
+      console.log("✅ Project created successfully!")
+    } catch (error) {
+      console.error("❌ Failed to create project:", error)
+      alert("Failed to create project. Please try again.")
+    }
+  }
+
   const handleEditProject = (project: any) => {
+    if (!hasPermission("manage_projects")) {
+      alert("You don't have permission to edit projects")
+      return
+    }
     console.log("🔧 Opening edit modal for project:", project)
     setSelectedProject(project)
     setIsEditProjectModalOpen(true)
   }
 
   const handleUpdateProject = async (projectId: number, updates: any) => {
+    if (!hasPermission("manage_projects")) {
+      alert("You don't have permission to update projects")
+      return
+    }
+
     try {
       console.log("💾 Updating project:", projectId, updates)
       await updateProject(projectId, updates)
       await refetch()
       console.log("✅ Project updated successfully")
+
+      if (typeof window !== "undefined") {
+        const project = projects.find((p) => p.id === projectId)
+        window.dispatchEvent(
+          new CustomEvent("projectUpdated", {
+            detail: {
+              projectId,
+              project: { ...project, ...updates },
+            },
+          }),
+        )
+      }
     } catch (error) {
       console.error("❌ Error updating project:", error)
       throw error
@@ -70,6 +218,11 @@ export default function ProjectsPage() {
   }
 
   const handleDeleteProject = async (project: any) => {
+    if (!hasPermission("manage_projects")) {
+      alert("You don't have permission to delete projects")
+      return
+    }
+
     const confirmMessage = `Are you sure you want to delete "${project.name}"?\n\nThis action cannot be undone and will remove:\n• All project data\n• Associated tasks\n• Team assignments`
     if (window.confirm(confirmMessage)) {
       try {
@@ -176,6 +329,7 @@ export default function ProjectsPage() {
           id: user.id,
           role: "Member",
         }))
+
       const payload = {
         ...newProjectForm,
         invite: inviteList,
@@ -270,7 +424,6 @@ export default function ProjectsPage() {
           key={project.id}
           className="group bg-white rounded-xl border border-slate-200 p-6 hover:shadow-lg transition-all duration-300 hover:border-blue-300 hover:-translate-y-0.5"
         >
-          {/* Header with Actions */}
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1 min-w-0">
               <h3
@@ -283,24 +436,25 @@ export default function ProjectsPage() {
                 {project.description || "No description provided"}
               </p>
             </div>
-            <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
-              <button
-                onClick={() => handleEditProject(project)}
-                className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
-                title="Edit project"
-              >
-                <Edit className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => handleDeleteProject(project)}
-                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
-                title="Delete project"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
+            {canCreateProject && (
+              <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                <button
+                  onClick={() => handleEditProject(project)}
+                  className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
+                  title="Edit project"
+                >
+                  <Edit className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => handleDeleteProject(project)}
+                  className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+                  title="Delete project"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            )}
           </div>
-          {/* Status & Priority Badges */}
           <div className="flex items-center gap-2 mb-4">
             <div
               className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg border ring-1 ${getStatusColor(
@@ -319,7 +473,6 @@ export default function ProjectsPage() {
               <span>{project.priority}</span>
             </div>
           </div>
-          {/* Progress Section */}
           <div className="mb-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-semibold text-slate-700">Progress</span>
@@ -334,7 +487,6 @@ export default function ProjectsPage() {
               ></div>
             </div>
           </div>
-          {/* Project Stats (Tasks only) */}
           <div className="grid grid-cols-1 gap-3 mb-4">
             <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
               <div className="flex items-center justify-center mb-1.5">
@@ -346,14 +498,12 @@ export default function ProjectsPage() {
               </p>
             </div>
           </div>
-          {/* Due Date */}
           {project.due_date && (
             <div className="flex items-center text-xs text-slate-600 mb-4 p-2 bg-slate-50 rounded-lg">
               <Calendar className="w-4 h-4 mr-2 text-slate-500" />
               <span className="font-medium">Due: {new Date(project.due_date).toLocaleDateString()}</span>
             </div>
           )}
-          {/* View Link */}
           <div className="flex justify-end pt-3 border-t border-slate-200">
             <Link
               href={`/dashboard/projects/${project.id}`}
@@ -459,20 +609,24 @@ export default function ProjectsPage() {
                     >
                       <Eye className="w-3.5 h-3.5" />
                     </Link>
-                    <button
-                      onClick={() => handleEditProject(project)}
-                      className="text-slate-600 hover:text-blue-600 transition-colors p-1 hover:bg-blue-50 rounded"
-                      title="Edit project"
-                    >
-                      <Edit className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteProject(project)}
-                      className="text-slate-600 hover:text-red-600 transition-colors p-1 hover:bg-red-50 rounded"
-                      title="Delete project"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    {canCreateProject && (
+                      <>
+                        <button
+                          onClick={() => handleEditProject(project)}
+                          className="text-slate-600 hover:text-blue-600 transition-colors p-1 hover:bg-blue-50 rounded"
+                          title="Edit project"
+                        >
+                          <Edit className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProject(project)}
+                          className="text-slate-600 hover:text-red-600 transition-colors p-1 hover:bg-red-50 rounded"
+                          title="Delete project"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </td>
               </tr>
@@ -485,12 +639,17 @@ export default function ProjectsPage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 p-4">
-      {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div className="space-y-3">
           <div>
             <h1 className="text-3xl font-bold text-slate-900 mb-1.5">Projects</h1>
             <p className="text-base text-slate-600">Manage and track your project progress with ease</p>
+            {currentUser && (
+              <p className="text-sm text-slate-500 mt-1">
+                Logged in as: <span className="font-semibold capitalize">{currentUser.role.replace("_", " ")}</span> -{" "}
+                {currentUser.name}
+              </p>
+            )}
           </div>
           <div className="flex items-center gap-4 text-sm">
             <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 rounded-lg border border-blue-200">
@@ -499,16 +658,22 @@ export default function ProjectsPage() {
             </div>
           </div>
         </div>
-        <button
-          onClick={() => setIsNewProjectModalOpen(true)}
-          className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 font-semibold text-base"
-        >
-          <Plus className="w-5 h-5" />
-          <span>New Project</span>
-        </button>
+        {canCreateProject ? (
+          <button
+            onClick={() => setIsNewProjectModalOpen(true)}
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 font-semibold text-base"
+          >
+            <Plus className="w-5 h-5" />
+            <span>New Project</span>
+          </button>
+        ) : (
+          <div className="text-center">
+            <p className="text-sm text-slate-500">You don't have permission to create projects</p>
+            <p className="text-xs text-slate-400">Contact your administrator or project manager to create projects.</p>
+          </div>
+        )}
       </div>
 
-      {/* Stats Cards */}
       {stats && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-5 rounded-xl border border-blue-200 shadow-sm hover:shadow-md transition-shadow">
@@ -558,10 +723,8 @@ export default function ProjectsPage() {
         </div>
       )}
 
-      {/* Filters and Controls */}
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
         <div className="flex flex-col xl:flex-row gap-4 items-start xl:items-center justify-between">
-          {/* Search and Filters */}
           <div className="flex flex-col lg:flex-row gap-3 flex-1">
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
@@ -603,7 +766,6 @@ export default function ProjectsPage() {
               </div>
             </div>
           </div>
-          {/* View Toggle */}
           <div className="flex items-center space-x-1.5 bg-slate-100 rounded-lg p-1.5">
             <button
               onClick={() => setViewMode("grid")}
@@ -631,7 +793,6 @@ export default function ProjectsPage() {
             </button>
           </div>
         </div>
-        {/* Active Filters Display */}
         {(searchTerm || statusFilter !== "all" || priorityFilter !== "all") && (
           <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-200 flex-wrap">
             <span className="text-xs font-semibold text-slate-600">Active filters:</span>
@@ -672,7 +833,6 @@ export default function ProjectsPage() {
         )}
       </div>
 
-      {/* Projects Display */}
       <div className="w-full">
         {filteredProjects.length === 0 ? (
           <div className="text-center py-16">
@@ -688,13 +848,20 @@ export default function ProjectsPage() {
                 : "Try adjusting your search terms or filters to find the projects you're looking for."}
             </p>
             {projects.length === 0 ? (
-              <button
-                onClick={() => setIsNewProjectModalOpen(true)}
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 font-semibold text-base"
-              >
-                <Plus className="w-5 h-5" />
-                <span>Create Your First Project</span>
-              </button>
+              canCreateProject ? (
+                <button
+                  onClick={() => setIsNewProjectModalOpen(true)}
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 font-semibold text-base"
+                >
+                  <Plus className="w-5 h-5" />
+                  <span>Create Your First Project</span>
+                </button>
+              ) : (
+                <div className="text-sm text-slate-500 bg-slate-50 rounded-lg p-4 max-w-md mx-auto">
+                  <p>You don't have permission to create projects.</p>
+                  <p>Contact your administrator or project manager to create projects.</p>
+                </div>
+              )
             ) : (
               <button
                 onClick={() => {
@@ -710,29 +877,25 @@ export default function ProjectsPage() {
           </div>
         ) : (
           <>
-            {/* Results Summary */}
             <div className="flex items-center justify-between mb-6">
               <p className="text-sm text-slate-600 font-medium">
                 Showing <span className="font-bold text-slate-900">{filteredProjects.length}</span> of{" "}
                 <span className="font-bold text-slate-900">{projects.length}</span> projects
               </p>
             </div>
-            {/* Projects Grid/List */}
             {viewMode === "grid" ? renderGridView() : renderListView()}
           </>
         )}
       </div>
 
-      {/* Modals */}
-      <NewProjectModal
-        isOpen={isNewProjectModalOpen}
-        onClose={() => setIsNewProjectModalOpen(false)}
-        onSubmit={async (data) => {
-          await createProject(data)
-          await refetch()
-        }}
-      />
-      {isEditProjectModalOpen && selectedProject && (
+      {hasPermission("manage_projects") && (
+        <NewProjectModal
+          isOpen={isNewProjectModalOpen}
+          onClose={() => setIsNewProjectModalOpen(false)}
+          onSubmit={handleCreateProject}
+        />
+      )}
+      {hasPermission("manage_projects") && isEditProjectModalOpen && selectedProject && (
         <EditProjectModal
           isOpen={isEditProjectModalOpen}
           onClose={() => {
