@@ -546,9 +546,8 @@ export default function RoleAndPermissionPage() {
                     </thead>
                     <tbody>
                       {permissions.map((perm) => {
-                        const rp = rolePerms.find(
-                          (r) => r.permission_id === perm.id
-                        );
+                        const rp = rolePerms.find((r) => String(r.permission_id) === String(perm.id));
+
                         const isAllowed = rp ? rp.allowed : false;
 
                         return (
