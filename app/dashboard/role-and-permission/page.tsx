@@ -87,7 +87,7 @@ export default function RoleAndPermissionPage() {
     }
 
     // Fetch users
-    fetch("http://127.0.0.1:8000/api/admin/users/with-role")
+    fetch("https://nexapro.web.id/api/admin/users/with-role")
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data.data)) {
@@ -108,7 +108,7 @@ export default function RoleAndPermissionPage() {
   useEffect(() => {
     if (currentUser?.role !== "admin") return;
 
-    fetch("http://127.0.0.1:8000/api/admin/permissions")
+    fetch("https://nexapro.web.id/api/admin/permissions")
       .then((res) => res.json())
       .then((data) => {
         if (data.success && Array.isArray(data.data)) {
@@ -127,7 +127,7 @@ export default function RoleAndPermissionPage() {
     if (!selectedRole || currentUser?.role !== "admin") return;
     setLoading(true);
 
-    fetch(`http://127.0.0.1:8000/api/admin/role-permissions/${selectedRole}`)
+    fetch(`https://nexapro.web.id/api/admin/role-permissions/${selectedRole}`)
       .then((res) => res.json())
       .then((data) => {
         console.log("Fetch role permissions response:", data); // Debug log
@@ -151,7 +151,7 @@ export default function RoleAndPermissionPage() {
 
   // Update user role
   const handleRoleChange = (userId: number, newRole: string) => {
-    fetch(`http://127.0.0.1:8000/api/admin/users/${userId}/role`, {
+    fetch(`https://nexapro.web.id/api/admin/users/${userId}/role`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ role: newRole }),
@@ -207,7 +207,7 @@ export default function RoleAndPermissionPage() {
   // Save permissions
   const handleSavePermissions = () => {
     setSaving(true);
-    fetch(`http://127.0.0.1:8000/api/admin/role-permissions/${selectedRole}`, {
+    fetch(`https://nexapro.web.id/api/admin/role-permissions/${selectedRole}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -227,7 +227,7 @@ export default function RoleAndPermissionPage() {
 
           // Refetch role permissions supaya state selalu update
           fetch(
-            `http://127.0.0.1:8000/api/admin/role-permissions/${selectedRole}`
+            `https://nexapro.web.id/api/admin/role-permissions/${selectedRole}`
           )
             .then((res) => res.json())
             .then((fresh) => {
