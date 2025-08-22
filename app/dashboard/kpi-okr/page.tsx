@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Plus, Target, TrendingUp, Calendar, Hash, FileText, Users, Building, User, CheckCircle, AlertCircle, Clock, BarChart3, RefreshCw, Search, Filter, Trash2, Edit } from "lucide-react"
+import { Plus, Target, CheckCircle, AlertCircle, Clock, BarChart3, RefreshCw, Search, Trash2, Edit } from "lucide-react"
 import AddKpiOkrModal from "@/components/add-kpi-okr-modal"
 import DeleteConfirmationModal from "@/components/delete-confirmation-modal"
 
@@ -117,8 +117,12 @@ export default function KPIOKRPage() {
   // Delete confirmation modal states
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
-  const [deleteType, setDeleteType] = useState<'kpi' | 'okr'>('kpi')
+  const [deleteType, setDeleteType] = useState<"kpi" | "okr">("kpi")
   const [deleteItem, setDeleteItem] = useState<{ id: number; name: string } | null>(null)
+
+  // Edit mode states
+  const [editMode, setEditMode] = useState(false)
+  const [editingItem, setEditingItem] = useState<KPI | OKR | null>(null)
 
   useEffect(() => {
     fetchData()
@@ -143,7 +147,7 @@ export default function KPIOKRPage() {
     try {
       const response = await fetch("/api/kpis")
       const data = await response.json()
-      
+
       if (data.success) {
         setKpis(data.data || [])
       }
@@ -188,20 +192,39 @@ export default function KPIOKRPage() {
     }
   }
 
+  const handleModalClose = () => {
+    setIsModalOpen(false)
+    setEditMode(false)
+    setEditingItem(null)
+  }
+
   const handleModalSuccess = () => {
     fetchData()
+    handleModalClose()
   }
 
   const handleDeleteKPI = (kpi: KPI) => {
-    setDeleteType('kpi')
+    setDeleteType("kpi")
     setDeleteItem({ id: kpi.id, name: kpi.name })
     setDeleteModalOpen(true)
   }
 
   const handleDeleteOKR = (okr: OKR) => {
-    setDeleteType('okr')
+    setDeleteType("okr")
     setDeleteItem({ id: okr.id, name: okr.objective })
     setDeleteModalOpen(true)
+  }
+
+  const handleEditKPI = (kpi: KPI) => {
+    setEditingItem(kpi)
+    setEditMode(true)
+    setIsModalOpen(true)
+  }
+
+  const handleEditOKR = (okr: OKR) => {
+    setEditingItem(okr)
+    setEditMode(true)
+    setIsModalOpen(true)
   }
 
   const confirmDelete = async () => {
@@ -209,36 +232,36 @@ export default function KPIOKRPage() {
 
     setDeleteLoading(true)
     try {
-      const endpoint = deleteType === 'kpi' ? `/api/kpis/${deleteItem.id}` : `/api/okrs/${deleteItem.id}`
-      
+      const endpoint = deleteType === "kpi" ? `/api/kpis/${deleteItem.id}` : `/api/okrs/${deleteItem.id}`
+
       const response = await fetch(endpoint, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('nexapro_token')}`,
+          Authorization: `Bearer ${localStorage.getItem("nexapro_token")}`,
         },
       })
 
       const data = await response.json()
 
       if (data.success) {
-        if (deleteType === 'kpi') {
-          setKpis(prev => prev.filter(kpi => kpi.id !== deleteItem.id))
+        if (deleteType === "kpi") {
+          setKpis((prev) => prev.filter((kpi) => kpi.id !== deleteItem.id))
           fetchKpiStats()
         } else {
-          setOkrs(prev => prev.filter(okr => okr.id !== deleteItem.id))
+          setOkrs((prev) => prev.filter((okr) => okr.id !== deleteItem.id))
           fetchOkrStats()
         }
-        
+
         // Show success message
-        const successMessage = deleteType === 'kpi' ? 'KPI deleted successfully' : 'OKR deleted successfully'
+        const successMessage = deleteType === "kpi" ? "KPI deleted successfully" : "OKR deleted successfully"
         alert(successMessage)
       } else {
-        const errorMessage = deleteType === 'kpi' ? 'Failed to delete KPI' : 'Failed to delete OKR'
-        alert(`${errorMessage}: ${data.message || 'Unknown error'}`)
+        const errorMessage = deleteType === "kpi" ? "Failed to delete KPI" : "Failed to delete OKR"
+        alert(`${errorMessage}: ${data.message || "Unknown error"}`)
       }
     } catch (error) {
       console.error(`Error deleting ${deleteType}:`, error)
-      const errorMessage = deleteType === 'kpi' ? 'Failed to delete KPI' : 'Failed to delete OKR'
+      const errorMessage = deleteType === "kpi" ? "Failed to delete KPI" : "Failed to delete OKR"
       alert(`${errorMessage}: Network error or server unavailable`)
     } finally {
       setDeleteLoading(false)
@@ -281,19 +304,21 @@ export default function KPIOKRPage() {
     }
   }
 
-  const filteredKpis = kpis.filter(kpi => {
-    const matchesSearch = kpi.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         kpi.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         kpi.category.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredKpis = kpis.filter((kpi) => {
+    const matchesSearch =
+      kpi.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      kpi.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      kpi.category.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = filterStatus === "all" || kpi.status === filterStatus
     const matchesCategory = filterCategory === "all" || kpi.category === filterCategory
     return matchesSearch && matchesStatus && matchesCategory
   })
 
-  const filteredOkrs = okrs.filter(okr => {
-    const matchesSearch = okr.objective.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         okr.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         okr.category.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredOkrs = okrs.filter((okr) => {
+    const matchesSearch =
+      okr.objective.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      okr.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      okr.category.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = filterStatus === "all" || okr.status === filterStatus
     const matchesCategory = filterCategory === "all" || okr.category === filterCategory
     return matchesSearch && matchesStatus && matchesCategory
@@ -352,20 +377,28 @@ export default function KPIOKRPage() {
           </div>
         ) : (
           filteredKpis.map((kpi) => (
-            <div key={kpi.id} className="bg-white p-6 rounded-lg border border-gray-200 hover:shadow-lg transition-shadow">
+            <div
+              key={kpi.id}
+              className="bg-white p-6 rounded-lg border border-gray-200 hover:shadow-lg transition-shadow"
+            >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
                   <h3 className="font-semibold text-gray-800 mb-1">{kpi.name}</h3>
                   <p className="text-sm text-gray-600 mb-2">{kpi.description}</p>
                   <div className="flex items-center gap-2">
-                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(kpi.status)}`}>
-                      {kpi.status}
-                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(kpi.status)}`}>{kpi.status}</span>
                     <span className="text-xs text-gray-500">{kpi.category}</span>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className="text-xl">{getDirectionIcon(kpi.direction)}</span>
+                  <button
+                    onClick={() => handleEditKPI(kpi)}
+                    className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors"
+                    title="Edit KPI"
+                  >
+                    <Edit className="w-4 h-4" />
+                  </button>
                   <button
                     onClick={() => handleDeleteKPI(kpi)}
                     className="p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors"
@@ -398,7 +431,7 @@ export default function KPIOKRPage() {
               </div>
 
               <div className="flex items-center justify-between text-xs text-gray-500">
-                <span>👤 {kpi.user?.name || 'Unknown'}</span>
+                <span>👤 {kpi.user?.name || "Unknown"}</span>
                 <span>📅 {new Date(kpi.start_date).toLocaleDateString()}</span>
               </div>
             </div>
@@ -461,17 +494,18 @@ export default function KPIOKRPage() {
           </div>
         ) : (
           filteredOkrs.map((okr) => (
-            <div key={okr.id} className="bg-white p-6 rounded-lg border border-gray-200 hover:shadow-lg transition-shadow">
+            <div
+              key={okr.id}
+              className="bg-white p-6 rounded-lg border border-gray-200 hover:shadow-lg transition-shadow"
+            >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
                   <h3 className="text-xl font-semibold text-gray-800 mb-2">{okr.objective}</h3>
                   <p className="text-gray-600 mb-2">{okr.description}</p>
                   <div className="flex items-center gap-4 text-sm text-gray-500">
                     <span>📅 {new Date(okr.start_date).toLocaleDateString()}</span>
-                    <span>👤 {okr.user?.name || 'Unknown'}</span>
-                    <span className={`px-2 py-1 rounded-full ${getStatusColor(okr.status)}`}>
-                      {okr.status}
-                    </span>
+                    <span>👤 {okr.user?.name || "Unknown"}</span>
+                    <span className={`px-2 py-1 rounded-full ${getStatusColor(okr.status)}`}>{okr.status}</span>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
@@ -482,6 +516,13 @@ export default function KPIOKRPage() {
                     <div className="text-3xl font-bold text-gray-800">{okr.overall_progress.toFixed(1)}%</div>
                     <div className="text-sm text-gray-500">Complete</div>
                   </div>
+                  <button
+                    onClick={() => handleEditOKR(okr)}
+                    className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors"
+                    title="Edit OKR"
+                  >
+                    <Edit className="w-4 h-4" />
+                  </button>
                   <button
                     onClick={() => handleDeleteOKR(okr)}
                     className="p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors"
@@ -517,7 +558,9 @@ export default function KPIOKRPage() {
                       ></div>
                     </div>
                     <div className="flex justify-between text-xs text-gray-500 mt-1">
-                      <span>{kr.current_value} / {kr.target_value} {kr.unit}</span>
+                      <span>
+                        {kr.current_value} / {kr.target_value} {kr.unit}
+                      </span>
                       <span>Weight: {kr.weight}</span>
                     </div>
                   </div>
@@ -536,7 +579,9 @@ export default function KPIOKRPage() {
       <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">📊 KPI & OKR Management</h1>
-          <p className="text-gray-600 mt-2">Track and manage your Key Performance Indicators and Objectives & Key Results</p>
+          <p className="text-gray-600 mt-2">
+            Track and manage your Key Performance Indicators and Objectives & Key Results
+          </p>
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -544,7 +589,7 @@ export default function KPIOKRPage() {
             disabled={loading}
             className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
             Refresh
           </button>
           <button
@@ -644,8 +689,10 @@ export default function KPIOKRPage() {
       {/* Add KPI/OKR Modal */}
       <AddKpiOkrModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleModalClose}
         onSuccess={handleModalSuccess}
+        editMode={editMode}
+        editingItem={editingItem}
       />
 
       {/* Delete Confirmation Modal */}
@@ -658,7 +705,7 @@ export default function KPIOKRPage() {
         onConfirm={confirmDelete}
         title={`Delete ${deleteType.toUpperCase()}`}
         message={`Are you sure you want to delete this ${deleteType.toUpperCase()}?`}
-        itemName={deleteItem?.name || ''}
+        itemName={deleteItem?.name || ""}
         loading={deleteLoading}
       />
     </div>

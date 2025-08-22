@@ -1,15 +1,9 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
   Loader2,
   Plus,
@@ -21,62 +15,58 @@ import {
   Phone,
   Calendar,
   UserPlus,
-  Settings,
   X,
   User,
-} from "lucide-react";
+  Eye,
+  EyeOff,
+} from "lucide-react"
 
 interface TeamMember {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  department: string;
-  position: string;
-  phone?: string;
-  avatar?: string;
-  joinedDate: string;
-  status: "active" | "inactive";
-  skills?: string[];
-  bio?: string;
+  id: number
+  name: string
+  email: string
+  role: string
+  department: string
+  position: string
+  phone?: string
+  avatar?: string
+  joinedDate: string
+  status: "active" | "inactive"
+  skills?: string[]
+  bio?: string
 }
 
 interface Department {
-  id: number;
-  name: string;
-  description: string;
-  manager?: string;
-  memberCount: number;
-  color: string;
+  id: number
+  name: string
+  description: string
+  manager?: string
+  memberCount: number
+  color: string
 }
 
 export default function TeamPage() {
-  const [currentUser, setCurrentUser] = useState<any>(null);
-  const [userPermissions, setUserPermissions] = useState<string[]>([]);
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const [departments, setDepartments] = useState<Department[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"members" | "departments">(
-    "members"
-  );
-
+  const [currentUser, setCurrentUser] = useState<any>(null)
+  const [userPermissions, setUserPermissions] = useState<string[]>([])
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
+  const [departments, setDepartments] = useState<Department[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<"members" | "departments">("members")
 
   // Department management states
-  const [showDepartmentModal, setShowDepartmentModal] = useState(false);
-  const [editingDepartment, setEditingDepartment] = useState<Department | null>(
-    null
-  );
+  const [showDepartmentModal, setShowDepartmentModal] = useState(false)
+  const [editingDepartment, setEditingDepartment] = useState<Department | null>(null)
   const [departmentForm, setDepartmentForm] = useState({
     name: "",
     description: "",
     manager: "",
     color: "#3B82F6",
-  });
+  })
 
   // Team member management states
-  const [showMemberModal, setShowMemberModal] = useState(false);
-  const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
+  const [showMemberModal, setShowMemberModal] = useState(false)
+  const [editingMember, setEditingMember] = useState<TeamMember | null>(null)
   const [memberForm, setMemberForm] = useState({
     name: "",
     email: "",
@@ -85,21 +75,23 @@ export default function TeamPage() {
     position: "",
     phone: "",
     bio: "",
-  });
+    password: "",
+  })
+  const [showPassword, setShowPassword] = useState(false)
 
   // Get current user and permissions
   useEffect(() => {
-    const userStr = localStorage.getItem("nexapro_user");
+    const userStr = localStorage.getItem("nexapro_user")
     if (userStr) {
-      const user = JSON.parse(userStr);
-      setCurrentUser(user);
+      const user = JSON.parse(userStr)
+      setCurrentUser(user)
 
       // Fetch user permissions from backend
       fetch(`/api/admin/user-permissions/${user.id}`)
         .then((res) => res.json())
         .then((data) => {
           if (data.success && data.data) {
-            setUserPermissions(data.data.map((p: any) => p.name));
+            setUserPermissions(data.data.map((p: any) => p.name))
           }
         })
         .catch(() => {
@@ -137,46 +129,43 @@ export default function TeamPage() {
               "track_time",
               "view_own_reports",
             ],
-          };
-          setUserPermissions(
-            rolePermissions[user.role as keyof typeof rolePermissions] || []
-          );
-        });
+          }
+          setUserPermissions(rolePermissions[user.role as keyof typeof rolePermissions] || [])
+        })
     }
-  }, []);
-  
+  }, [])
 
   // Permission check functions
   const hasPermission = (permission: string): boolean => {
-    if (!currentUser) return false;
-    if (currentUser.role === "admin") return true; // Admin has all permissions
-    return userPermissions.includes(permission);
-  };
+    if (!currentUser) return false
+    if (currentUser.role === "admin") return true // Admin has all permissions
+    return userPermissions.includes(permission)
+  }
 
   // Load team data
   useEffect(() => {
-    loadTeamData();
-  }, []);
+    loadTeamData()
+  }, [])
 
   const loadTeamData = async () => {
-    setLoading(true);
+    setLoading(true)
     try {
       // Load team members
-      const membersRes = await fetch("https://nexapro.web.id/api/team");
-      const membersData = await membersRes.json();
+      const membersRes = await fetch("https://nexapro.web.id/api/team")
+      const membersData = await membersRes.json()
       if (membersData.success) {
-        setTeamMembers(membersData.data || []);
+        setTeamMembers(membersData.data || [])
       }
 
       // Load departments
-      const deptRes = await fetch("https://nexapro.web.id/api/team/departments");
-      const deptData = await deptRes.json();
+      const deptRes = await fetch("https://nexapro.web.id/api/team/departments")
+      const deptData = await deptRes.json()
       if (deptData.success) {
-        setDepartments(deptData.data || []);
+        setDepartments(deptData.data || [])
       }
     } catch (error) {
-      console.error("Failed to load team data:", error);
-      setError("Failed to load team data");
+      console.error("Failed to load team data:", error)
+      setError("Failed to load team data")
 
       // Mock data for demo
       setTeamMembers([
@@ -206,7 +195,7 @@ export default function TeamPage() {
           skills: ["Product Management", "Agile", "User Research"],
           bio: "Product manager passionate about creating user-centric solutions.",
         },
-      ]);
+      ])
 
       setDepartments([
         {
@@ -233,47 +222,44 @@ export default function TeamPage() {
           memberCount: 3,
           color: "#F59E0B",
         },
-      ]);
+      ])
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   // Department management functions
   const handleCreateDepartment = async () => {
     if (!hasPermission("manage_team")) {
-      alert("You don't have permission to create departments");
-      return;
+      alert("You don't have permission to create departments")
+      return
     }
 
     try {
-      const response = await fetch(
-        "https://nexapro.web.id/api/team/departments",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            // tambahkan Authorization jika perlu
-            Authorization: `Bearer ${localStorage.getItem("nexapro_token")}`,
-          },
-        }
-      );
+      const response = await fetch("https://nexapro.web.id/api/team/departments", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          // tambahkan Authorization jika perlu
+          Authorization: `Bearer ${localStorage.getItem("nexapro_token")}`,
+        },
+      })
 
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json()
         if (data.success) {
-          setDepartments((prev) => [...prev, data.data]);
-          setShowDepartmentModal(false);
+          setDepartments((prev) => [...prev, data.data])
+          setShowDepartmentModal(false)
           setDepartmentForm({
             name: "",
             description: "",
             manager: "",
             color: "#3B82F6",
-          });
+          })
         }
       }
     } catch (error) {
-      console.error("Failed to create department:", error);
+      console.error("Failed to create department:", error)
       // Mock creation for demo
       const newDept: Department = {
         id: Date.now(),
@@ -282,103 +268,89 @@ export default function TeamPage() {
         manager: departmentForm.manager,
         memberCount: 0,
         color: departmentForm.color,
-      };
-      setDepartments((prev) => [...prev, newDept]);
-      setShowDepartmentModal(false);
+      }
+      setDepartments((prev) => [...prev, newDept])
+      setShowDepartmentModal(false)
       setDepartmentForm({
         name: "",
         description: "",
         manager: "",
         color: "#3B82F6",
-      });
+      })
     }
-  };
+  }
 
   const handleUpdateDepartment = async () => {
-    if (!editingDepartment || !hasPermission("manage_team")) return;
+    if (!editingDepartment || !hasPermission("manage_team")) return
 
     try {
-      const response = await fetch(
-        `https://nexapro.web.id/api/team/departments/${editingDepartment.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(departmentForm),
-        }
-      );
+      const response = await fetch(`https://nexapro.web.id/api/team/departments/${editingDepartment.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(departmentForm),
+      })
 
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json()
         if (data.success) {
           setDepartments((prev) =>
-            prev.map((dept) =>
-              dept.id === editingDepartment.id
-                ? { ...dept, ...departmentForm }
-                : dept
-            )
-          );
-          setShowDepartmentModal(false);
-          setEditingDepartment(null);
+            prev.map((dept) => (dept.id === editingDepartment.id ? { ...dept, ...departmentForm } : dept)),
+          )
+          setShowDepartmentModal(false)
+          setEditingDepartment(null)
           setDepartmentForm({
             name: "",
             description: "",
             manager: "",
             color: "#3B82F6",
-          });
+          })
         }
       }
     } catch (error) {
-      console.error("Failed to update department:", error);
+      console.error("Failed to update department:", error)
       // Mock update for demo
       setDepartments((prev) =>
-        prev.map((dept) =>
-          dept.id === editingDepartment.id
-            ? { ...dept, ...departmentForm }
-            : dept
-        )
-      );
-      setShowDepartmentModal(false);
-      setEditingDepartment(null);
+        prev.map((dept) => (dept.id === editingDepartment.id ? { ...dept, ...departmentForm } : dept)),
+      )
+      setShowDepartmentModal(false)
+      setEditingDepartment(null)
       setDepartmentForm({
         name: "",
         description: "",
         manager: "",
         color: "#3B82F6",
-      });
+      })
     }
-  };
+  }
 
   const handleDeleteDepartment = async (deptId: number) => {
     if (!hasPermission("manage_team")) {
-      alert("You don't have permission to delete departments");
-      return;
+      alert("You don't have permission to delete departments")
+      return
     }
 
-    if (!confirm("Are you sure you want to delete this department?")) return;
+    if (!confirm("Are you sure you want to delete this department?")) return
 
     try {
-      const response = await fetch(
-        `https://nexapro.web.id/api/team/departments/${deptId}`,
-        {
-          method: "DELETE",
-        }
-      );
+      const response = await fetch(`https://nexapro.web.id/api/team/departments/${deptId}`, {
+        method: "DELETE",
+      })
 
       if (response.ok) {
-        setDepartments((prev) => prev.filter((dept) => dept.id !== deptId));
+        setDepartments((prev) => prev.filter((dept) => dept.id !== deptId))
       }
     } catch (error) {
-      console.error("Failed to delete department:", error);
+      console.error("Failed to delete department:", error)
       // Mock deletion for demo
-      setDepartments((prev) => prev.filter((dept) => dept.id !== deptId));
+      setDepartments((prev) => prev.filter((dept) => dept.id !== deptId))
     }
-  };
+  }
 
   // Team member management functions
   const handleCreateMember = async () => {
     if (!hasPermission("manage_team")) {
-      alert("You don't have permission to add team members");
-      return;
+      alert("You don't have permission to add team members")
+      return
     }
 
     try {
@@ -386,13 +358,13 @@ export default function TeamPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(memberForm),
-      });
+      })
 
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json()
         if (data.success) {
-          setTeamMembers((prev) => [...prev, data.data]);
-          setShowMemberModal(false);
+          setTeamMembers((prev) => [...prev, data.data])
+          setShowMemberModal(false)
           setMemberForm({
             name: "",
             email: "",
@@ -401,11 +373,12 @@ export default function TeamPage() {
             position: "",
             phone: "",
             bio: "",
-          });
+            password: "",
+          })
         }
       }
     } catch (error) {
-      console.error("Failed to create team member:", error);
+      console.error("Failed to create team member:", error)
       // Mock creation for demo
       const newMember: TeamMember = {
         id: Date.now(),
@@ -418,9 +391,9 @@ export default function TeamPage() {
         joinedDate: new Date().toISOString().split("T")[0],
         status: "active",
         bio: memberForm.bio,
-      };
-      setTeamMembers((prev) => [...prev, newMember]);
-      setShowMemberModal(false);
+      }
+      setTeamMembers((prev) => [...prev, newMember])
+      setShowMemberModal(false)
       setMemberForm({
         name: "",
         email: "",
@@ -429,35 +402,29 @@ export default function TeamPage() {
         position: "",
         phone: "",
         bio: "",
-      });
+        password: "",
+      })
     }
-  };
+  }
 
   const handleUpdateMember = async () => {
-    if (!editingMember || !hasPermission("manage_team")) return;
+    if (!editingMember || !hasPermission("manage_team")) return
 
     try {
-      const response = await fetch(
-        `https://nexapro.web.id/api/team/${editingMember.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(memberForm),
-        }
-      );
+      const response = await fetch(`https://nexapro.web.id/api/team/${editingMember.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(memberForm),
+      })
 
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json()
         if (data.success) {
           setTeamMembers((prev) =>
-            prev.map((member) =>
-              member.id === editingMember.id
-                ? { ...member, ...memberForm }
-                : member
-            )
-          );
-          setShowMemberModal(false);
-          setEditingMember(null);
+            prev.map((member) => (member.id === editingMember.id ? { ...member, ...memberForm } : member)),
+          )
+          setShowMemberModal(false)
+          setEditingMember(null)
           setMemberForm({
             name: "",
             email: "",
@@ -466,19 +433,18 @@ export default function TeamPage() {
             position: "",
             phone: "",
             bio: "",
-          });
+            password: "",
+          })
         }
       }
     } catch (error) {
-      console.error("Failed to update team member:", error);
+      console.error("Failed to update team member:", error)
       // Mock update for demo
       setTeamMembers((prev) =>
-        prev.map((member) =>
-          member.id === editingMember.id ? { ...member, ...memberForm } : member
-        )
-      );
-      setShowMemberModal(false);
-      setEditingMember(null);
+        prev.map((member) => (member.id === editingMember.id ? { ...member, ...memberForm } : member)),
+      )
+      setShowMemberModal(false)
+      setEditingMember(null)
       setMemberForm({
         name: "",
         email: "",
@@ -487,64 +453,60 @@ export default function TeamPage() {
         position: "",
         phone: "",
         bio: "",
-      });
+        password: "",
+      })
     }
-  };
+  }
 
   const handleDeleteMember = async (memberId: number) => {
     if (!hasPermission("manage_team")) {
-      alert("You don't have permission to remove team members");
-      return;
+      alert("You don't have permission to remove team members")
+      return
     }
 
-    if (!confirm("Are you sure you want to remove this team member?")) return;
+    if (!confirm("Are you sure you want to remove this team member?")) return
 
     try {
-      const response = await fetch(
-        `https://nexapro.web.id/api/team/${memberId}`,
-        {
-          method: "DELETE",
-        }
-      );
+      const response = await fetch(`https://nexapro.web.id/api/team/${memberId}`, {
+        method: "DELETE",
+      })
 
       if (response.ok) {
-        setTeamMembers((prev) =>
-          prev.filter((member) => member.id !== memberId)
-        );
+        setTeamMembers((prev) => prev.filter((member) => member.id !== memberId))
       }
     } catch (error) {
-      console.error("Failed to delete team member:", error);
+      console.error("Failed to delete team member:", error)
       // Mock deletion for demo
-      setTeamMembers((prev) => prev.filter((member) => member.id !== memberId));
+      setTeamMembers((prev) => prev.filter((member) => member.id !== memberId))
     }
-  };
+  }
 
   // Open department modal
   const openDepartmentModal = (dept?: Department) => {
     if (dept) {
-      setEditingDepartment(dept);
+      setEditingDepartment(dept)
       setDepartmentForm({
         name: dept.name,
         description: dept.description,
         manager: dept.manager || "",
         color: dept.color,
-      });
+      })
     } else {
-      setEditingDepartment(null);
+      setEditingDepartment(null)
       setDepartmentForm({
         name: "",
         description: "",
         manager: "",
         color: "#3B82F6",
-      });
+      })
     }
-    setShowDepartmentModal(true);
-  };
+    setShowDepartmentModal(true)
+  }
 
   // Open member modal
   const openMemberModal = (member?: TeamMember) => {
     if (member) {
-      setEditingMember(member);
+      setEditingMember(member)
       setMemberForm({
         name: member.name,
         email: member.email,
@@ -553,9 +515,10 @@ export default function TeamPage() {
         position: member.position,
         phone: member.phone || "",
         bio: member.bio || "",
-      });
+        password: "",
+      })
     } else {
-      setEditingMember(null);
+      setEditingMember(null)
       setMemberForm({
         name: "",
         email: "",
@@ -564,10 +527,12 @@ export default function TeamPage() {
         position: "",
         phone: "",
         bio: "",
-      });
+        password: "",
+      })
     }
-    setShowMemberModal(true);
-  };
+    setShowPassword(false)
+    setShowMemberModal(true)
+  }
 
   if (loading) {
     return (
@@ -575,7 +540,7 @@ export default function TeamPage() {
         <Loader2 className="h-8 w-8 animate-spin text-green-600" />
         <span className="ml-2 text-gray-600">Loading team data...</span>
       </div>
-    );
+    )
   }
 
   if (!hasPermission("manage_team") && !hasPermission("view_projects")) {
@@ -583,18 +548,14 @@ export default function TeamPage() {
       <div className="p-8 text-center">
         <div className="max-w-md mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
           <div className="text-red-500 text-6xl mb-4">🚫</div>
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
-            Access Denied
-          </h2>
-          <p className="text-gray-600 dark:text-gray-300">
-            You don't have permission to access team management.
-          </p>
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Access Denied</h2>
+          <p className="text-gray-600 dark:text-gray-300 mt-1">You don't have permission to access team management.</p>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
             Required: manage_team | Your role: {currentUser?.role}
           </p>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -602,12 +563,8 @@ export default function TeamPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Team Management
-          </h1>
-          <p className="text-gray-600 dark:text-gray-300 mt-1">
-            Manage your team members and departments
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Team Management</h1>
+          <p className="text-gray-600 dark:text-gray-300 mt-1">Manage your team members and departments</p>
         </div>
         <div className="flex items-center text-black space-x-3">
           {hasPermission("manage_team") && (
@@ -678,9 +635,7 @@ export default function TeamPage() {
                         </span>
                       </div>
                       <div>
-                        <CardTitle className="text-lg text-gray-900 dark:text-white">
-                          {member.name}
-                        </CardTitle>
+                        <CardTitle className="text-lg text-gray-900 dark:text-white">{member.name}</CardTitle>
                         <CardDescription className="text-gray-600 dark:text-gray-300">
                           {member.position}
                         </CardDescription>
@@ -725,9 +680,7 @@ export default function TeamPage() {
                   </div>
                   <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
                     <Calendar className="h-4 w-4" />
-                    <span>
-                      Joined {new Date(member.joinedDate).toLocaleDateString()}
-                    </span>
+                    <span>Joined {new Date(member.joinedDate).toLocaleDateString()}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <span
@@ -745,11 +698,7 @@ export default function TeamPage() {
                       {member.role}
                     </span>
                   </div>
-                  {member.bio && (
-                    <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">
-                      {member.bio}
-                    </p>
-                  )}
+                  {member.bio && <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">{member.bio}</p>}
                 </CardContent>
               </Card>
             ))}
@@ -757,74 +706,67 @@ export default function TeamPage() {
         )}
 
         {activeTab === "departments" && (
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {departments.map((dept, index) => (
-      <Card
-        key={dept.id || `dept-${index}`}
-        className="hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
-      >
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div
-                className="w-12 h-12 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: `${dept.color}20` }}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {departments.map((dept, index) => (
+              <Card
+                key={dept.id || `dept-${index}`}
+                className="hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
               >
-                <Building
-                  className="h-6 w-6"
-                  style={{ color: dept.color }}
-                />
-              </div>
-              <div>
-                <CardTitle className="text-lg text-gray-900 dark:text-white">
-                  {dept.name}
-                </CardTitle>
-                <CardDescription className="text-gray-600 dark:text-gray-300">
-                  {dept.memberCount} members
-                </CardDescription>
-              </div>
-            </div>
-            {hasPermission("manage_team") && (
-              <div className="flex items-center space-x-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => openDepartmentModal(dept)}
-                  className="h-8 w-8 p-0 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white"
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDeleteDepartment(dept.id)}
-                  className="h-8 w-8 p-0 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div
+                        className="w-12 h-12 rounded-full flex items-center justify-center"
+                        style={{ backgroundColor: `${dept.color}20` }}
+                      >
+                        <Building className="h-6 w-6" style={{ color: dept.color }} />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg text-gray-900 dark:text-white">{dept.name}</CardTitle>
+                        <CardDescription className="text-gray-600 dark:text-gray-300">
+                          {dept.memberCount} members
+                        </CardDescription>
+                      </div>
+                    </div>
+                    {hasPermission("manage_team") && (
+                      <div className="flex items-center space-x-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => openDepartmentModal(dept)}
+                          className="h-8 w-8 p-0 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteDepartment(dept.id)}
+                          className="h-8 w-8 p-0 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-sm text-gray-600 dark:text-gray-300">{dept.description}</p>
+                  {dept.manager && (
+                    <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
+                      <User className="h-4 w-4" />
+                      <span>Manager: {dept.manager}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
+                    <Users className="h-4 w-4" />
+                    <span>{dept.memberCount} team members</span>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            {dept.description}
-          </p>
-          {dept.manager && (
-            <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
-              <User className="h-4 w-4" />
-              <span>Manager: {dept.manager}</span>
-            </div>
-          )}
-          <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
-            <Users className="h-4 w-4" />
-            <span>{dept.memberCount} team members</span>
-          </div>
-        </CardContent>
-      </Card>
-    ))}
-  </div>
-)}
+        )}
       </div>
       {/* Footer */}
 
@@ -861,9 +803,7 @@ export default function TeamPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Description
-                </label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
                 <Input
                   value={departmentForm.description}
                   onChange={(e) =>
@@ -877,9 +817,7 @@ export default function TeamPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Manager
-                </label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Manager</label>
                 <Input
                   value={departmentForm.manager}
                   onChange={(e) =>
@@ -893,9 +831,7 @@ export default function TeamPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Color
-                </label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Color</label>
                 <Input
                   type="color"
                   value={departmentForm.color}
@@ -918,11 +854,7 @@ export default function TeamPage() {
                 Cancel
               </Button>
               <Button
-                onClick={
-                  editingDepartment
-                    ? handleUpdateDepartment
-                    : handleCreateDepartment
-                }
+                onClick={editingDepartment ? handleUpdateDepartment : handleCreateDepartment}
                 className="bg-green-600 hover:bg-green-700 text-white"
               >
                 {editingDepartment ? "Update" : "Create"}
@@ -949,44 +881,48 @@ export default function TeamPage() {
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Name
-                </label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
                 <Input
                   value={memberForm.name}
-                  onChange={(e) =>
-                    setMemberForm((prev) => ({ ...prev, name: e.target.value }))
-                  }
+                  onChange={(e) => setMemberForm((prev) => ({ ...prev, name: e.target.value }))}
                   placeholder="Enter full name"
                   className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Email
-                </label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
                 <Input
                   type="email"
                   value={memberForm.email}
-                  onChange={(e) =>
-                    setMemberForm((prev) => ({
-                      ...prev,
-                      email: e.target.value,
-                    }))
-                  }
+                  onChange={(e) => setMemberForm((prev) => ({ ...prev, email: e.target.value }))}
                   placeholder="Enter email address"
                   className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Role
-                </label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    value={memberForm.password}
+                    onChange={(e) => setMemberForm((prev) => ({ ...prev, password: e.target.value }))}
+                    placeholder="Enter initial password"
+                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-100"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Role</label>
                 <select
                   value={memberForm.role}
-                  onChange={(e) =>
-                    setMemberForm((prev) => ({ ...prev, role: e.target.value }))
-                  }
+                  onChange={(e) => setMemberForm((prev) => ({ ...prev, role: e.target.value }))}
                   className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
                 >
                   <option value="member">Member</option>
@@ -995,9 +931,7 @@ export default function TeamPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Department
-                </label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Department</label>
                 <select
                   value={memberForm.department}
                   onChange={(e) =>
@@ -1017,9 +951,7 @@ export default function TeamPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Position
-                </label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Position</label>
                 <Input
                   value={memberForm.position}
                   onChange={(e) =>
@@ -1033,9 +965,7 @@ export default function TeamPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Phone
-                </label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label>
                 <Input
                   value={memberForm.phone}
                   onChange={(e) =>
@@ -1049,13 +979,14 @@ export default function TeamPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Bio
-                </label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Bio</label>
                 <textarea
                   value={memberForm.bio}
                   onChange={(e) =>
-                    setMemberForm((prev) => ({ ...prev, bio: e.target.value }))
+                    setMemberForm((prev) => ({
+                      ...prev,
+                      bio: e.target.value,
+                    }))
                   }
                   placeholder="Enter bio"
                   className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm h-20 resize-none bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
@@ -1071,9 +1002,7 @@ export default function TeamPage() {
                 Cancel
               </Button>
               <Button
-                onClick={
-                  editingMember ? handleUpdateMember : handleCreateMember
-                }
+                onClick={editingMember ? handleUpdateMember : handleCreateMember}
                 className="bg-green-600 hover:bg-green-700 text-white"
               >
                 {editingMember ? "Update" : "Add"}
@@ -1083,5 +1012,5 @@ export default function TeamPage() {
         </div>
       )}
     </div>
-  );
+  )
 }

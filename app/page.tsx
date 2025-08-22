@@ -1,14 +1,14 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import SolusiDropdown from "@/components/solusi-dropdown";
-import Footer from "@/components/footer"; // Import the new Footer component
-import { ArrowRight, CheckCircle, Users, Zap, Shield, Menu, X, BarChart2, Clock, ClipboardList } from 'lucide-react';
+import { useState } from "react"
+import Image from "next/image"
+import Link from "next/link"
+import SolusiDropdown from "@/components/solusi-dropdown"
+import Footer from "@/components/footer" // Import the new Footer component
+import { ArrowRight, CheckCircle, Users, Zap, Shield, Menu, X, BarChart2, Clock, ClipboardList } from "lucide-react"
 
 export default function Home() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f1a25] text-white overflow-hidden">
@@ -20,16 +20,11 @@ export default function Home() {
       <header className="fixed top-0 left-0 z-50 w-full bg-transparent backdrop-blur-sm">
         <nav className="flex items-center justify-between backdrop-blur-sm bg-white/5 px-4 sm:px-6 py-3 sm:py-4 border border-white/10">
           <div className="flex items-center space-x-4 sm:space-x-8">
-            <Link
-              href="/"
-              className="flex items-center space-x-2 sm:space-x-3 group"
-            >
+            <Link href="/" className="flex items-center space-x-2 sm:space-x-3 group">
               <div className="h-10 w-10 sm:h-12 sm:w-12 relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-[#00d2c6] to-[#00b5ab] rounded-xl rotate-6 group-hover:rotate-12 transition-transform duration-300"></div>
                 <div className="absolute inset-0 bg-gradient-to-r from-[#00d2c6] to-[#00b5ab] rounded-xl flex items-center justify-center">
-                  <span className="text-lg sm:text-xl font-bold text-white">
-                    N
-                  </span>
+                  <span className="text-lg sm:text-xl font-bold text-white">N</span>
                 </div>
               </div>
               <span className="text-xl sm:text-2xl font-bold">
@@ -41,16 +36,10 @@ export default function Home() {
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-8">
             <SolusiDropdown />
-            <Link
-              href="/bantuan"
-              className="text-gray-300 hover:text-[#00d2c6] transition-colors duration-200"
-            >
+            <Link href="/bantuan" className="text-gray-300 hover:text-[#00d2c6] transition-colors duration-200">
               Bantuan
             </Link>
-            <Link
-              href="/about"
-              className="text-gray-300 hover:text-[#00d2c6] transition-colors duration-200"
-            >
+            <Link href="/about" className="text-gray-300 hover:text-[#00d2c6] transition-colors duration-200">
               Tentang
             </Link>
           </div>
@@ -74,11 +63,7 @@ export default function Home() {
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="sm:hidden p-2 text-white hover:text-[#00d2c6] transition-colors"
           >
-            {isMobileMenuOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
+            {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </nav>
         {/* Mobile Menu */}
@@ -129,9 +114,7 @@ export default function Home() {
           <div className="text-center mb-12 sm:mb-20">
             <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-[#00d2c6]/20 to-[#00b5ab]/20 rounded-full px-6 py-2 border border-[#00d2c6]/30 mb-6">
               <Zap className="h-4 w-4 text-[#00d2c6]" />
-              <span className="text-sm text-gray-300">
-                Platform Manajemen Proyek Perusahaan
-              </span>
+              <span className="text-sm text-gray-300">Platform Manajemen Proyek Perusahaan</span>
             </div>
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6">
               <span className="bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">
@@ -143,9 +126,8 @@ export default function Home() {
               </span>
             </h1>
             <p className="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed mb-10">
-              NexaPro adalah platform manajemen proyek internal yang membantu
-              tim perusahaan mengelola tugas, memantau progres, dan
-              berkolaborasi dengan efisiensi maksimal.
+              NexaPro adalah platform manajemen proyek internal yang membantu tim perusahaan mengelola tugas, memantau
+              progres, dan berkolaborasi dengan efisiensi maksimal.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mb-10">
               <Link
@@ -203,8 +185,7 @@ export default function Home() {
               </span>
             </h2>
             <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto px-4 sm:px-0">
-              Platform yang dirancang khusus untuk tim perusahaan dengan
-              fitur-fitur canggih
+              Platform yang dirancang khusus untuk tim perusahaan dengan fitur-fitur canggih
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
@@ -213,12 +194,9 @@ export default function Home() {
               <div className="h-10 w-10 sm:h-12 sm:w-12 bg-gradient-to-r from-[#00d2c6] to-[#00b5ab] rounded-xl flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300">
                 <Users className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-white">
-                Kolaborasi Tim
-              </h3>
+              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-white">Kolaborasi Tim</h3>
               <p className="text-gray-400 leading-relaxed text-sm sm:text-base">
-                Bekerja bersama tim dengan real-time collaboration, chat
-                terintegrasi, dan file sharing yang aman.
+                Bekerja bersama tim dengan real-time collaboration, chat terintegrasi, dan file sharing yang aman.
               </p>
             </div>
             {/* Manajemen Proyek */}
@@ -226,12 +204,9 @@ export default function Home() {
               <div className="h-10 w-10 sm:h-12 sm:w-12 bg-gradient-to-r from-[#00d2c6] to-[#00b5ab] rounded-xl flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300">
                 <ClipboardList className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-white">
-                Manajemen Proyek
-              </h3>
+              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-white">Manajemen Proyek</h3>
               <p className="text-gray-400 leading-relaxed text-sm sm:text-base">
-                Buat, atur, dan pantau proyek secara menyeluruh dengan fitur
-                pelacakan progres dan penjadwalan dinamis.
+                Buat, atur, dan pantau proyek secara menyeluruh dengan fitur pelacakan progres dan penjadwalan dinamis.
               </p>
             </div>
             {/* Pelacakan Waktu */}
@@ -239,13 +214,125 @@ export default function Home() {
               <div className="h-10 w-10 sm:h-12 sm:w-12 bg-gradient-to-r from-[#00d2c6] to-[#00b5ab] rounded-xl flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300">
                 <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-white">
-                Pelacakan Waktu
-              </h3>
+              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-white">Pelacakan Waktu</h3>
               <p className="text-gray-400 leading-relaxed text-sm sm:text-base">
-                Catat durasi kerja harian dengan sistem time tracker yang
-                otomatis terintegrasi ke dalam laporan.
+                Catat durasi kerja harian dengan sistem time tracker yang otomatis terintegrasi ke dalam laporan.
               </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How to Use Section */}
+      <section className="relative z-10 container mx-auto px-4 py-12 sm:py-20">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-4xl font-bold mb-4">
+              <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                Cara Menggunakan NexaPro
+              </span>
+            </h2>
+            <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto px-4 sm:px-0">
+              Panduan langkah demi langkah untuk memulai menggunakan platform manajemen proyek
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+            {/* Step 1 */}
+            <div className="group p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/0 backdrop-blur-sm border border-white/10 hover:border-[#00d2c6]/50 transition-all duration-300">
+              <div className="h-10 w-10 sm:h-12 sm:w-12 bg-gradient-to-r from-[#00d2c6] to-[#00b5ab] rounded-xl flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300">
+                <span className="text-white font-bold">1</span>
+              </div>
+              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-white">Login & Dashboard</h3>
+              <p className="text-gray-400 leading-relaxed text-sm sm:text-base">
+                Masuk ke akun Anda dan akses dashboard utama untuk melihat ringkasan proyek dan tugas terbaru.
+              </p>
+            </div>
+
+            {/* Step 2 */}
+            <div className="group p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/0 backdrop-blur-sm border border-white/10 hover:border-[#00d2c6]/50 transition-all duration-300">
+              <div className="h-10 w-10 sm:h-12 sm:w-12 bg-gradient-to-r from-[#00d2c6] to-[#00b5ab] rounded-xl flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300">
+                <span className="text-white font-bold">2</span>
+              </div>
+              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-white">Buat Proyek Baru</h3>
+              <p className="text-gray-400 leading-relaxed text-sm sm:text-base">
+                Klik "New Project" untuk membuat proyek baru, atur detail, deadline, dan assign anggota tim.
+              </p>
+            </div>
+
+            {/* Step 3 */}
+            <div className="group p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/0 backdrop-blur-sm border border-white/10 hover:border-[#00d2c6]/50 transition-all duration-300">
+              <div className="h-10 w-10 sm:h-12 sm:w-12 bg-gradient-to-r from-[#00d2c6] to-[#00b5ab] rounded-xl flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300">
+                <span className="text-white font-bold">3</span>
+              </div>
+              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-white">Kelola Tugas</h3>
+              <p className="text-gray-400 leading-relaxed text-sm sm:text-base">
+                Tambahkan tugas, set prioritas, track progress, dan update status secara real-time.
+              </p>
+            </div>
+
+            {/* Step 4 */}
+            <div className="group p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/0 backdrop-blur-sm border border-white/10 hover:border-[#00d2c6]/50 transition-all duration-300">
+              <div className="h-10 w-10 sm:h-12 sm:w-12 bg-gradient-to-r from-[#00d2c6] to-[#00b5ab] rounded-xl flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300">
+                <span className="text-white font-bold">4</span>
+              </div>
+              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-white">Monitor & Laporan</h3>
+              <p className="text-gray-400 leading-relaxed text-sm sm:text-base">
+                Pantau progress melalui calendar, lihat laporan detail, dan export data untuk analisis.
+              </p>
+            </div>
+          </div>
+
+          {/* Quick Access Guide */}
+          <div className="mt-12 sm:mt-16 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-white/20">
+            <h3 className="text-xl sm:text-2xl font-bold mb-6 text-center">
+              <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                Menu Utama & Fitur
+              </span>
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="flex items-start space-x-3">
+                <BarChart2 className="h-5 w-5 text-[#00d2c6] mt-1 flex-shrink-0" />
+                <div>
+                  <h4 className="font-semibold text-white mb-1">Dashboard</h4>
+                  <p className="text-sm text-gray-400">Overview proyek, statistik, dan aktivitas terbaru</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-3">
+                <ClipboardList className="h-5 w-5 text-[#00d2c6] mt-1 flex-shrink-0" />
+                <div>
+                  <h4 className="font-semibold text-white mb-1">Projects</h4>
+                  <p className="text-sm text-gray-400">Kelola semua proyek, buat baru, edit status</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-3">
+                <Clock className="h-5 w-5 text-[#00d2c6] mt-1 flex-shrink-0" />
+                <div>
+                  <h4 className="font-semibold text-white mb-1">Calendar</h4>
+                  <p className="text-sm text-gray-400">Jadwal proyek, deadline, dan event penting</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-3">
+                <Users className="h-5 w-5 text-[#00d2c6] mt-1 flex-shrink-0" />
+                <div>
+                  <h4 className="font-semibold text-white mb-1">Team</h4>
+                  <p className="text-sm text-gray-400">Manajemen anggota tim dan kolaborasi</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-3">
+                <BarChart2 className="h-5 w-5 text-[#00d2c6] mt-1 flex-shrink-0" />
+                <div>
+                  <h4 className="font-semibold text-white mb-1">Reports</h4>
+                  <p className="text-sm text-gray-400">Laporan progress, analisis, dan export data</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-3">
+                <Shield className="h-5 w-5 text-[#00d2c6] mt-1 flex-shrink-0" />
+                <div>
+                  <h4 className="font-semibold text-white mb-1">Settings</h4>
+                  <p className="text-sm text-gray-400">Pengaturan akun, notifikasi, dan preferensi</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -261,8 +348,7 @@ export default function Home() {
               </span>
             </h2>
             <p className="text-lg sm:text-xl text-gray-300 mb-6 sm:mb-8 max-w-2xl mx-auto">
-              Bergabung dengan tim perusahaan yang sudah merasakan efisiensi
-              maksimal dengan NexaPro
+              Bergabung dengan tim perusahaan yang sudah merasakan efisiensi maksimal dengan NexaPro
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
@@ -286,5 +372,5 @@ export default function Home() {
       {/* Add the Footer component here */}
       <Footer />
     </div>
-  );
+  )
 }

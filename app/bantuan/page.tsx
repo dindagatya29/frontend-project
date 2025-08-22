@@ -21,6 +21,7 @@ import Footer from "@/components/footer"
 export default function BantuanPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [searchQuery, setSearchQuery] = useState("")
 
   const openModal = () => setIsModalOpen(true)
   const closeModal = () => setIsModalOpen(false)
@@ -73,12 +74,23 @@ export default function BantuanPage() {
     },
   ]
 
+  const filteredFaqs = faqs.filter(
+    (faq) =>
+      faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      faq.answer.toLowerCase().includes(searchQuery.toLowerCase()),
+  )
+
+  const filteredCategories = helpCategories.filter(
+    (category) =>
+      category.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      category.description.toLowerCase().includes(searchQuery.toLowerCase()),
+  )
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#1a2a3a] to-[#0f1a25] text-white">
       {/* Navigation */}
       <header className="fixed top-0 left-0 z-50 w-full bg-transparent backdrop-blur-sm">
-       <nav className="flex items-center justify-between backdrop-blur-sm bg-white/5 px-4 sm:px-6 py-3 sm:py-4 border border-white/10">
-
+        <nav className="flex items-center justify-between backdrop-blur-sm bg-white/5 px-4 sm:px-6 py-3 sm:py-4 border border-white/10">
           <div className="flex items-center space-x-8">
             <div className="flex-1"></div>
             <Link href="/" className="flex items-center space-x-3">
@@ -114,7 +126,9 @@ export default function BantuanPage() {
             </Link>
           </div>
         </nav>
-      </header><br /><br />
+      </header>
+      <br />
+      <br />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16">
@@ -133,6 +147,8 @@ export default function BantuanPage() {
             <input
               type="search"
               placeholder="Cari bantuan..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-12 pr-4 py-4 bg-white/10 border border-gray-600 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00d2c6] focus:border-transparent placeholder-gray-400"
             />
           </div>
@@ -145,7 +161,7 @@ export default function BantuanPage() {
           <h2 className="text-3xl font-bold text-center mb-12 text-white">Kategori Bantuan</h2>
 
           <div className="grid md:grid-cols-2 gap-6">
-            {helpCategories.map((category, index) => (
+            {filteredCategories.map((category, index) => (
               <div
                 key={index}
                 className="p-6 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-[#00d2c6]/50 transition-all duration-200 cursor-pointer group"
@@ -166,6 +182,12 @@ export default function BantuanPage() {
               </div>
             ))}
           </div>
+
+          {filteredCategories.length === 0 && searchQuery && (
+            <div className="text-center py-8">
+              <p className="text-gray-400">Tidak ada kategori yang ditemukan untuk "{searchQuery}"</p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -175,7 +197,7 @@ export default function BantuanPage() {
           <h2 className="text-3xl font-bold text-center mb-12 text-white">FAQ</h2>
 
           <div className="space-y-4">
-            {faqs.map((faq, index) => (
+            {filteredFaqs.map((faq, index) => (
               <div key={index} className="bg-white/5 rounded-xl border border-white/10 overflow-hidden">
                 <button
                   onClick={() => setOpenFaq(openFaq === index ? null : index)}
@@ -194,6 +216,12 @@ export default function BantuanPage() {
               </div>
             ))}
           </div>
+
+          {filteredFaqs.length === 0 && searchQuery && (
+            <div className="text-center py-8">
+              <p className="text-gray-400">Tidak ada FAQ yang ditemukan untuk "{searchQuery}"</p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -251,8 +279,8 @@ export default function BantuanPage() {
       {/* Support Modal */}
       <SupportModal isOpen={isModalOpen} onClose={closeModal} />
 
-       {/* Add the Footer component here */}
-            <Footer />
+      {/* Add the Footer component here */}
+      <Footer />
     </div>
   )
 }

@@ -618,7 +618,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <line x1="3" y1="18" x2="21" y2="18" />
                 </svg>
               </button>
-              <div className="relative">
+              {/* <div className="relative">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
@@ -639,7 +639,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   placeholder="Search..."
                   className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 w-80 bg-gray-50"
                 />
-              </div>
+              </div> */}
             </div>
 
             <div className="flex items-center space-x-4">

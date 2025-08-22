@@ -1,137 +1,182 @@
 import Link from "next/link"
-import Image from "next/image"
-import { Facebook, Instagram, Twitter, Linkedin, CheckCircle, ArrowRight, Mail, Phone, MapPin } from 'lucide-react' // Added Mail, Phone, MapPin icons
+import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from "lucide-react"
 
 export default function Footer() {
   return (
-    <footer className="bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f1a25] text-white py-12 sm:py-16 border-t border-white/10">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 sm:gap-12 mb-10 sm:mb-16">
-          {/* Company Info */}
-          <div className="col-span-1 md:col-span-2 lg:col-span-1">
-            <Link href="/" className="flex items-center space-x-2 group mb-4">
-              <div className="h-10 w-10 relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-[#00d2c6] to-[#00b5ab] rounded-xl rotate-6 group-hover:rotate-12 transition-transform duration-300"></div>
-                <div className="absolute inset-0 bg-gradient-to-r from-[#00d2c6] to-[#00b5ab] rounded-xl flex items-center justify-center">
-                  <span className="text-lg font-bold text-white">N</span>
+    <footer className="relative z-10 bg-gradient-to-br from-white/5 to-white/0 backdrop-blur-sm border-t border-white/10">
+      <div className="container mx-auto px-4 py-12 sm:py-16">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {/* Company Info */}
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <div className="h-10 w-10 relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#00d2c6] to-[#00b5ab] rounded-xl rotate-6"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#00d2c6] to-[#00b5ab] rounded-xl flex items-center justify-center">
+                    <span className="text-lg font-bold text-white">N</span>
+                  </div>
+                </div>
+                <span className="text-xl font-bold">
+                  <span className="text-white">Nexa</span>
+                  <span className="text-[#00d2c6]">Pro</span>
+                </span>
+              </div>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Platform manajemen proyek internal yang membantu tim perusahaan mengelola tugas dan berkolaborasi dengan
+                efisiensi maksimal.
+              </p>
+              <div className="flex space-x-4">
+                <a href="#" className="text-gray-400 hover:text-[#00d2c6] transition-colors duration-200">
+                  <Facebook className="h-5 w-5" />
+                </a>
+                <a href="#" className="text-gray-400 hover:text-[#00d2c6] transition-colors duration-200">
+                  <Twitter className="h-5 w-5" />
+                </a>
+                <a href="#" className="text-gray-400 hover:text-[#00d2c6] transition-colors duration-200">
+                  <Instagram className="h-5 w-5" />
+                </a>
+                <a href="#" className="text-gray-400 hover:text-[#00d2c6] transition-colors duration-200">
+                  <Linkedin className="h-5 w-5" />
+                </a>
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-white">Menu Utama</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link
+                    href="/dashboard"
+                    className="text-gray-400 hover:text-[#00d2c6] transition-colors duration-200 text-sm"
+                  >
+                    Dashboard
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/projects"
+                    className="text-gray-400 hover:text-[#00d2c6] transition-colors duration-200 text-sm"
+                  >
+                    Projects
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/calendar"
+                    className="text-gray-400 hover:text-[#00d2c6] transition-colors duration-200 text-sm"
+                  >
+                    Calendar
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/team"
+                    className="text-gray-400 hover:text-[#00d2c6] transition-colors duration-200 text-sm"
+                  >
+                    Team
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/reports"
+                    className="text-gray-400 hover:text-[#00d2c6] transition-colors duration-200 text-sm"
+                  >
+                    Reports
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Support */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-white">Dukungan</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link
+                    href="/bantuan"
+                    className="text-gray-400 hover:text-[#00d2c6] transition-colors duration-200 text-sm"
+                  >
+                    Bantuan
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/about"
+                    className="text-gray-400 hover:text-[#00d2c6] transition-colors duration-200 text-sm"
+                  >
+                    Tentang Kami
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/privacy"
+                    className="text-gray-400 hover:text-[#00d2c6] transition-colors duration-200 text-sm"
+                  >
+                    Kebijakan Privasi
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/terms"
+                    className="text-gray-400 hover:text-[#00d2c6] transition-colors duration-200 text-sm"
+                  >
+                    Syarat & Ketentuan
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Contact Info */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-white">Kontak</h3>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-3">
+                  <Mail className="h-4 w-4 text-[#00d2c6] flex-shrink-0" />
+                  <span className="text-gray-400 text-sm">support@nexapro.com</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Phone className="h-4 w-4 text-[#00d2c6] flex-shrink-0" />
+                  <span className="text-gray-400 text-sm">+62 21 1234 5678</span>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <MapPin className="h-4 w-4 text-[#00d2c6] flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-400 text-sm">
+                    Jakarta, Indonesia
+                    <br />
+                    Gedung Perkantoran Modern
+                  </span>
                 </div>
               </div>
-              <span className="text-xl font-bold">
-                <span className="text-white">Nexa</span>
-                <span className="text-[#00d2c6]">Pro</span>
-              </span>
-            </Link>
-            <p className="text-sm text-gray-400 leading-relaxed mb-6">
-              NexaPro adalah platform manajemen proyek internal yang membantu
-              tim perusahaan mengelola tugas, memantau progres, dan
-              berkolaborasi dengan efisiensi maksimal.
-            </p>
-            <div className="flex space-x-3">
-              <Link href="#" className="w-9 h-9 rounded-full bg-white/10 text-gray-300 flex items-center justify-center hover:bg-[#00d2c6] hover:text-white transition-colors">
-                <Facebook className="w-4 h-4" />
-              </Link>
-              <Link href="#" className="w-9 h-9 rounded-full bg-white/10 text-gray-300 flex items-center justify-center hover:bg-[#00d2c6] hover:text-white transition-colors">
-                <Instagram className="w-4 h-4" />
-              </Link>
-              <Link href="#" className="w-9 h-9 rounded-full bg-white/10 text-gray-300 flex items-center justify-center hover:bg-[#00d2c6] hover:text-white transition-colors">
-                <Twitter className="w-4 h-4" />
-              </Link>
-              <Link href="#" className="w-9 h-9 rounded-full bg-white/10 text-gray-300 flex items-center justify-center hover:bg-[#00d2c6] hover:text-white transition-colors">
-                <Linkedin className="w-4 h-4" />
-              </Link>
             </div>
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h3 className="text-lg font-semibold text-white mb-4">Quick Links</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/" className="text-gray-400 hover:text-[#00d2c6] transition-colors text-sm">
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link href="/about" className="text-gray-400 hover:text-[#00d2c6] transition-colors text-sm">
-                  Tentang
-                </Link>
-              </li>
-              <li>
-                <Link href="/bantuan" className="text-gray-400 hover:text-[#00d2c6] transition-colors text-sm">
-                  Bantuan
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Legal */}
-          <div>
-            <h3 className="text-lg font-semibold text-white mb-4">Legal</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="#" className="text-gray-400 hover:text-[#00d2c6] transition-colors text-sm">
-                  Kebijakan Privasi
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-400 hover:text-[#00d2c6] transition-colors text-sm">
-                  Syarat & Ketentuan
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-400 hover:text-[#00d2c6] transition-colors text-sm">
-                  Kebijakan Asuransi
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-400 hover:text-[#00d2c6] transition-colors text-sm">
-                  Bantuan & Dukungan
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Contact Us Section (Replaced Download App) */}
-          <div>
-            <h3 className="text-lg font-semibold text-white mb-4">Hubungi Kami</h3>
-            <ul className="space-y-3">
-              <li className="flex items-center gap-2 text-gray-400 text-sm">
-                <Mail className="w-4 h-4 text-[#00d2c6] flex-shrink-0" />
-                <span>info@nexapro.com</span>
-              </li>
-              <li className="flex items-center gap-2 text-gray-400 text-sm">
-                <Phone className="w-4 h-4 text-[#00d2c6] flex-shrink-0" />
-                <span>+62 812-3456-7890</span>
-              </li>
-              <li className="flex items-start gap-2 text-gray-400 text-sm">
-                <MapPin className="w-4 h-4 text-[#00d2c6] flex-shrink-0 mt-0.5" />
-                <span>Jl. Contoh No. 123, Jakarta, Indonesia</span>
-              </li>
-              <li>
+          {/* Bottom Bar */}
+          <div className="border-t border-white/10 mt-12 pt-8">
+            <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
+              <p className="text-gray-400 text-sm text-center sm:text-left">© 2024 NexaPro. All rights reserved.</p>
+              <div className="flex items-center space-x-6">
                 <Link
-                  href="/bantuan" // Assuming a contact page or help page
-                  className="inline-flex items-center gap-2 text-[#00d2c6] hover:text-white transition-colors text-sm font-medium mt-2"
+                  href="/privacy"
+                  className="text-gray-400 hover:text-[#00d2c6] transition-colors duration-200 text-sm"
                 >
-                  Kirim Pesan
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  Privacy
                 </Link>
-              </li>
-            </ul>
+                <Link
+                  href="/terms"
+                  className="text-gray-400 hover:text-[#00d2c6] transition-colors duration-200 text-sm"
+                >
+                  Terms
+                </Link>
+                <Link
+                  href="/cookies"
+                  className="text-gray-400 hover:text-[#00d2c6] transition-colors duration-200 text-sm"
+                >
+                  Cookies
+                </Link>
+              </div>
+            </div>
           </div>
-        </div>
-
-        {/* Bottom Section */}
-        <div className="flex flex-col sm:flex-row items-center justify-between pt-8 border-t border-white/10 text-sm text-gray-400">
-          <Link
-            href="#"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-white/20 bg-white/5 hover:bg-white/10 transition-colors mb-4 sm:mb-0"
-          >
-            <CheckCircle className="w-4 h-4 text-[#00d2c6]" />
-            <ArrowRight className="w-4 h-4 ml-1" />
-          </Link>
-          <p className="text-center sm:text-right">
-            NexaPro &copy; {new Date().getFullYear()}. All rights reserved.
-          </p>
         </div>
       </div>
     </footer>
