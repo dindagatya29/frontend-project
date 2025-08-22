@@ -178,18 +178,23 @@ export default function RoleAndPermissionPage() {
 
   // Toggle permission for role
   const handlePermissionToggle = (permissionId: number, allowed: boolean) => {
+    console.log("Toggle perm:", permissionId, allowed);
     setRolePerms((prev) => {
-      const existing = prev.find((rp) => rp.permission_id === permissionId);
+      console.log("Before update:", prev);
+      const existing = prev.find(
+        (rp) => Number(rp.permission_id) === Number(permissionId)
+      );
       if (existing) {
         return prev.map((rp) =>
-          rp.permission_id === permissionId ? { ...rp, allowed } : rp
+          Number(rp.permission_id) === Number(permissionId)
+            ? { ...rp, allowed }
+            : rp
         );
       } else {
-        // Add new permission if it doesn't exist
         return [
           ...prev,
           {
-            id: Date.now(), // temporary ID
+            id: Date.now(),
             role: selectedRole,
             permission_id: permissionId,
             allowed,
@@ -546,8 +551,9 @@ export default function RoleAndPermissionPage() {
                     </thead>
                     <tbody>
                       {permissions.map((perm) => {
-                        const rp = rolePerms.find((r) => String(r.permission_id) === String(perm.id));
-
+                        const rp = rolePerms.find(
+                          (r) => Number(r.permission_id) === Number(perm.id)
+                        );
                         const isAllowed = rp ? rp.allowed : false;
 
                         return (
